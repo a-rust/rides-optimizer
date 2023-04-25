@@ -16,3 +16,7 @@ class OptimizeConstant():
         self.max_time = user_preferences.max_time
         self.max_ride_repeats = user_preferences.max_ride_repeats
         self.min_total_rides = user_preferences.min_total_rides
+
+    # Returns a dict where the keys are ride names, and the values are total weights (i.e., wait times plus ride times)
+    def set_ride_weights(self) -> dict:
+        return {self.all_rides[i]: self.wait_times[i] + self.ride_times[i] for i in range(len(self.all_rides))}
