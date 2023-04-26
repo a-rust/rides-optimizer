@@ -20,3 +20,32 @@ class OptimizeConstant():
     # Returns a dict where the keys are ride names, and the values are total weights (i.e., wait times plus ride times)
     def set_ride_weights(self) -> dict:
         return {self.all_rides[i]: self.wait_times[i] + self.ride_times[i] for i in range(len(self.all_rides))}
+
+    # Maximizes the total number of rides to go on, given user constraints
+    def maximize_rides(self, ride_weights: dict) -> list | None:
+        prob = pulp.LpProblem("Maximize the number of total rides to go on", pulp.LpMaximize)
+
+        # Variable: ride_i will be an LpInteger with a lower bound of 0 and an upper bound of the maximum number of times a single ride can be rode constraint (set by the user)
+        rides = pulp.LpVariable.dicts("ride", ride_weights.keys(), lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
+
+        # Variable: ride_rode_i will be an LpBinary that is used in the minimum distinct rides constraint (set by the user)
+        rides_rode = pulp.LpVariable.dicts("ride_rode",
+                                        ride_weights.keys(), cat=pulp.LpBinary)
+        
+        # Objective function: maximize the sum of ride_i's
+        prob += pulp.lpSum(rides[i] for i in ride_weights.keys())
+
+        # Constraint: the sum of the dot product of the rides and their corresponding weights must be at most the user's max time constraint
+        #   - In this case, the user must set a max time constraint, or else the solution would be unbounded
+        if self.max_time != None:
+            prob += pulp.lpDot([rides[i] for i in ride_weights.keys()], [ride_weights.get(i) for i in ride_weights.keys()]) <= self.max_time
+        else:
+            return
+
+        prob.solve()
+
+        # Check to see if the solution is optimal
+        if pulp.LpStatus[prob.status] == "Optimal":
+            return ({i: pulp.value(rides[i]) for i in ride_weights.keys()})
+        else:
+            return
