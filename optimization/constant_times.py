@@ -12,6 +12,7 @@ class OptimizeConstant():
         self.ride_times = ride_times
         self.required_rides = user_preferences.required_rides
         self.avoid_rides = user_preferences.avoid_rides
+        self.require_and_avoid = user_preferences.require_and_avoid_rides()
         self.min_distinct_rides = user_preferences.min_distinct_rides
         self.max_time = user_preferences.max_time
         self.max_ride_repeats = user_preferences.max_ride_repeats

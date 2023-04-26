@@ -19,3 +19,11 @@ class UserPreferences():
         self.max_ride_repeats = max_ride_repeats
         self.max_time = max_time
         self.min_total_rides = min_total_rides
+
+    # Returns a boolean as to whether any rides are being both required and avoided at the same time
+    def require_and_avoid_rides(self) -> bool:
+        if self.required_rides != None and self.avoid_rides != None:
+            if len(set(self.required_rides).intersection(set(self.avoid_rides))) > 0:
+                return True
+            else:
+                return False 
