@@ -76,3 +76,11 @@ def test_maximize_rides_with_same_required_avoid_rides():
     ride_weights = park.set_ride_weights()
     # Cannot require and avoid 'a' at the same time
     assert park.maximize_rides(ride_weights) == None
+
+# Test for maximizing the number of rides with min distinct rides constraint
+def test_maximize_rides_with_min_distinct_rides():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time=30, min_total_rides=None)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # We require all 3 distinct rides, which means we must ride rides 'a', 'b', 'c' at least once. Their summed weight is 23, which means that there is 30-23=7 extra space left over, which fits one more value of 'b'
+    assert park.maximize_rides(ride_weights) == {'a': 1.0, 'b': 2.0, 'c': 1.0}

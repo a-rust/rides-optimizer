@@ -57,6 +57,17 @@ class OptimizeConstant():
                 if i in self.avoid_rides:
                     prob += rides[i] == 0
 
+        # Constraint: the number of non-zero ride_i's must be at least the user's minimum distinct number of rides constraint
+        #   - The user can opt to not include this preference without implying an unbounded solution
+        if self.min_distinct_rides != None:
+            for i in ride_weights.keys():
+                # Case 1: rides[i] = 0 implies rides_rode[i] = 0
+                # Case 2: rides[i] >= 1 implies unique_ride[i] >= 1
+                    #   - Since unique_ride[i] is binary, then case 2 implies unique_ride[i] = 1
+                prob += rides[i] >= 1 * rides_rode[i]
+                # The number of distinct rides rode must be at least the user's minimum distinct number of rides constraint
+                prob += pulp.lpSum(rides_rode) >= self.min_distinct_rides
+
         prob.solve()
 
         # Check to see if the solution is optimal
