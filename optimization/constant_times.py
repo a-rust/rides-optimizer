@@ -40,7 +40,7 @@ class OptimizeConstant():
         if self.max_time != None:
             prob += pulp.lpDot([rides[i] for i in ride_weights.keys()], [ride_weights.get(i) for i in ride_weights.keys()]) <= self.max_time
         else:
-            return
+            return None
 
         prob.solve()
 
@@ -48,4 +48,4 @@ class OptimizeConstant():
         if pulp.LpStatus[prob.status] == "Optimal":
             return ({i: pulp.value(rides[i]) for i in ride_weights.keys()})
         else:
-            return
+            return None
