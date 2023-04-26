@@ -29,6 +29,22 @@ def test_maximize_rides_with_no_max_time():
     # The solution is unbounded if no max_time_constraint, and so maximize_rides should return None
     assert park.maximize_rides(ride_weights) == None
 
+# Test for maximizing the number of rides with max ride repeats constraint
+def test_maximize_rides_with_max_ride_repeats():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=2, max_time=30, min_total_rides=None)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # The solution is unbounded if no max_time_constraint, and so maximize_rides should return None
+    assert park.maximize_rides(ride_weights) == {'a': 2.0, 'b': 2.0, 'c': 0.0}
+
+# Test for maximizing the number of rides with no max ride repeats constraint
+def test_maximize_rides_with_no_max_ride_repeats():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time=30, min_total_rides=None)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # The solution is unbounded if no max_time_constraint, and so maximize_rides should return None
+    assert park.maximize_rides(ride_weights) == {'a': 0.0, 'b': 5.0, 'c': 0.0}
+
 # Test for maximizing the number of rides with required rides constraint
 def test_maximize_rides_with_required_rides():
     user_preferences = up.UserPreferences(required_rides=['a'], avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time=30, min_total_rides=None)
