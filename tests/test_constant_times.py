@@ -42,7 +42,7 @@ def test_maximize_rides_with_no_max_ride_repeats():
     user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time=30, min_total_rides=None)
     park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
     ride_weights = park.set_ride_weights()
-    # The solution is unbounded if no max_time_constraint, and so maximize_rides should return None
+    # If no max ride repeats, all of the space will be go to 'b', as the weight of 'b' is less than the weights of 'a' and 'c'
     assert park.maximize_rides(ride_weights) == {'a': 0.0, 'b': 5.0, 'c': 0.0}
 
 # Test for maximizing the number of rides with required rides constraint
