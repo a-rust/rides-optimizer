@@ -42,6 +42,20 @@ class OptimizeConstant():
             prob += pulp.lpDot([rides[i] for i in ride_weights.keys()], [ride_weights.get(i) for i in ride_weights.keys()]) <= self.max_time
         else:
             return None
+        
+        # Constraint: ride_i >= 1 if the user wants to ride ride_i at least once
+        # Constraint: ride_i = 0 if the user wants to avoid ride_i all together
+        # User cannot require to go on a ride while also avoiding it
+        if self.require_and_avoid:
+                return None 
+        if self.required_rides != None:
+            for i in self.all_rides:
+                if i in self.required_rides:
+                    prob += rides[i] >= 1
+        if self.avoid_rides != None:
+            for i in self.all_rides:
+                if i in self.avoid_rides:
+                    prob += rides[i] == 0
 
         prob.solve()
 
