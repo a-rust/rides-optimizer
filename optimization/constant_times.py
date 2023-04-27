@@ -83,3 +83,30 @@ class OptimizeConstant():
             return ({i: pulp.value(rides[i]) for i in ride_weights.keys()})
         else:
             return None
+
+    # --------------------
+    # Minimization methods
+    # --------------------
+
+    # Minimizes the total amount of time waiting and riding rides, given user constraints
+    def minimize_time(self, ride_weights: dict) -> list | None:
+        prob = pulp.LpProblem("Minimize the total amount of time waiting and riding rides", pulp.LpMinimize)
+
+        # Variables: defined the same as in the maximization problem
+        rides = pulp.LpVariable.dicts("ride", ride_weights.keys(), lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
+        rides_rode = pulp.LpVariable.dicts("ride_rode",
+                                        ride_weights.keys(), cat=pulp.LpBinary)
+
+        # Objective function: minimize the weighted sum of rides to go on
+        prob += pulp.lpSum(rides[i] * ride_weights.get(i) for i in ride_weights.keys())
+
+        # Constraint: must go on at least some specified number of rides, set by the user
+        prob += pulp.lpSum(rides[i] for i in ride_weights.keys()) >= self.min_total_rides
+
+        prob.solve()
+
+        # Check to see if the solution is optimal
+        if pulp.LpStatus[prob.status] == "Optimal":
+            return ({i: pulp.value(rides[i]) for i in ride_weights.keys()})
+        else:
+            return None

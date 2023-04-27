@@ -92,3 +92,15 @@ def test_maximize_rides_with_min_distinct_rides():
     ride_weights = park.set_ride_weights()
     # We require all 3 distinct rides, which means we must ride rides 'a', 'b', 'c' at least once. Their summed weight is 23, which means that there is 30-23=7 extra space left over, which fits one more value of 'b'
     assert park.maximize_rides(ride_weights) == {'a': 1.0, 'b': 2.0, 'c': 1.0}
+
+# -------------------------
+# Minimization method tests
+# -------------------------
+
+# Test for minimizing the total time with min total rides constraint
+def test_minimize_time_with_min_total_rides():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time=None, min_total_rides=10)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Requiring to go on at least 10 total rides (not necessarily distinct) will result in repeating 'b' 10 times. Assigning a positive integer value to min_distinct_rides will force going on more than just 'b' 
+    assert park.minimize_time(ride_weights) == {'a': 0.0, 'b': 10.0, 'c': 0.0}
