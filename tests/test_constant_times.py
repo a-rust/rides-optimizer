@@ -121,3 +121,11 @@ def test_minimize_time_with_all_constraints():
     ride_weights = park.set_ride_weights()
     # Requiring to go on rides 'a' and 'c' at least once, while avoiding ride 'b' entirely, and also requiring to go on at least 10 total rides will result in going on 'a' 9 times, and going on 'c' just once, since the weight of 'a' is less than the weight of 'c'
     assert park.minimize_time(ride_weights) == {'a': 9.0, 'b': 0.0, 'c': 1.0}
+
+# Test to check user preferences that lead to a contradiction
+def test_minimize_time_contradiction():
+    user_preferences = up.UserPreferences(required_rides=['a', 'c'], avoid_rides=['b'], min_distinct_rides=None, max_ride_repeats=2, max_time=None, min_total_rides=10)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Setting the min total rides to be larger than the product of the size of all distinct rides and the max ride repeats leads to a contradiction
+    assert park.minimize_time(ride_weights) == None

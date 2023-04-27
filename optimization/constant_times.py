@@ -26,12 +26,26 @@ class OptimizeConstant():
     def set_ride_weights(self) -> dict:
         return {self.all_rides[i]: self.wait_times[i] + self.ride_times[i] for i in range(len(self.all_rides))}
     
+    # Returns a bool as to whether the a combination of user preferences leads to a contradiction 
+    def set_contradiction_value(self) -> bool:
+        valid = False
+        # If the min total rides is greater than the product of the size of all distinct rides and the max ride repeats, then contradiction as no feasible solution exists
+        if self.max_ride_repeats != None and self.min_total_rides != None:
+            if (len(self.all_rides) * int(self.max_ride_repeats) < self.min_total_rides):
+                valid = True
+        return valid
+    
     # --------------------
     # Maximization Methods
     # --------------------
 
     # Maximizes the total number of rides to go on, given user constraints
     def maximize_rides(self, ride_weights: dict) -> list | None:
+
+        # Deal with the possibility of a preference contradiction before moving forward
+        if self.set_contradiction_value():
+            return None
+
         prob = pulp.LpProblem("Maximize the number of total rides to go on", pulp.LpMaximize)
 
         # Variable: ride_i will be an LpInteger with a lower bound of 0 and an upper bound of the maximum number of times a single ride can be rode constraint (set by the user)
@@ -43,6 +57,8 @@ class OptimizeConstant():
         
         # Objective function: maximize the sum of ride_i's
         prob += pulp.lpSum(rides[i] for i in ride_weights.keys())
+
+        
 
         # Constraint: the sum of the dot product of the rides and their corresponding weights must be at most the user's max time constraint
         #   - In this case, the user must set a max time constraint, or else the solution would be unbounded
@@ -90,6 +106,11 @@ class OptimizeConstant():
 
     # Minimizes the total amount of time waiting and riding rides, given user constraints
     def minimize_time(self, ride_weights: dict) -> list | None:
+
+        # Deal with the possibility of a preference contradiction before moving forward; same implementation as maximization method
+        if self.set_contradiction_value():
+            return None
+
         prob = pulp.LpProblem("Minimize the total amount of time waiting and riding rides", pulp.LpMinimize)
 
         # Variables: defined the same as in the maximization problem
