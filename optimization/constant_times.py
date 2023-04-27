@@ -100,8 +100,12 @@ class OptimizeConstant():
         # Objective function: minimize the weighted sum of rides to go on
         prob += pulp.lpSum(rides[i] * ride_weights.get(i) for i in ride_weights.keys())
 
-        # Constraint: must go on at least some specified number of rides, set by the user
-        prob += pulp.lpSum(rides[i] for i in ride_weights.keys()) >= self.min_total_rides
+        # Constraint: optimal solution must include a total of at least some specified number of rides, set by the user
+        #   - If not set by the user, optimal solution will be not going on any rides, which is trivial
+        if self.min_total_rides != None:
+            prob += pulp.lpSum(rides[i] for i in ride_weights.keys()) >= self.min_total_rides
+        else:
+            return None
 
         prob.solve()
 

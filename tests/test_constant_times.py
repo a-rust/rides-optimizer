@@ -104,3 +104,11 @@ def test_minimize_time_with_min_total_rides():
     ride_weights = park.set_ride_weights()
     # Requiring to go on at least 10 total rides (not necessarily distinct) will result in repeating 'b' 10 times. Assigning a positive integer value to min_distinct_rides will force going on more than just 'b' 
     assert park.minimize_time(ride_weights) == {'a': 0.0, 'b': 10.0, 'c': 0.0}
+
+# Test for minimizing the total time with no min total rides constraint
+def test_minimize_time_with_no_min_total_rides():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time=None, min_total_rides=None)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Not setting a min total rides will result in an optimal solution going on 0 rides, which is trivial and thus returns None 
+    assert park.minimize_time(ride_weights) == None
