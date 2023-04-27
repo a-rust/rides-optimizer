@@ -106,6 +106,24 @@ class OptimizeConstant():
             prob += pulp.lpSum(rides[i] for i in ride_weights.keys()) >= self.min_total_rides
         else:
             return None
+        
+        # Constraint: require and avoid rides; same implementation as maximization method
+        if self.require_and_avoid:
+                return None 
+        if self.required_rides != None:
+            for i in self.all_rides:
+                if i in self.required_rides:
+                    prob += rides[i] >= 1
+        if self.avoid_rides != None:
+            for i in self.all_rides:
+                if i in self.avoid_rides:
+                    prob += rides[i] == 0
+
+        # Constraint: min distinct rides; same implementation as maximization method
+        if self.min_distinct_rides != None:
+            for i in ride_weights.keys():
+                prob += rides[i] >= 1 * rides_rode[i]
+                prob += pulp.lpSum(rides_rode) >= self.min_distinct_rides
 
         prob.solve()
 

@@ -112,3 +112,12 @@ def test_minimize_time_with_no_min_total_rides():
     ride_weights = park.set_ride_weights()
     # Not setting a min total rides will result in an optimal solution going on 0 rides, which is trivial and thus returns None 
     assert park.minimize_time(ride_weights) == None
+
+# Test for minimizing the total time with all applicable constraints
+#   - Implementation for non-required constraints are same as maximization method, which already tested
+def test_minimize_time_with_all_constraints():
+    user_preferences = up.UserPreferences(required_rides=['a', 'c'], avoid_rides=['b'], min_distinct_rides=None, max_ride_repeats=None, max_time=None, min_total_rides=10)
+    park = ct.OptimizeConstant(rides, wait_times, ride_times, user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Requiring to go on rides 'a' and 'c' at least once, while avoiding ride 'b' entirely, and also requiring to go on at least 10 total rides will result in going on 'a' 9 times, and going on 'c' just once, since the weight of 'a' is less than the weight of 'c'
+    assert park.minimize_time(ride_weights) == {'a': 9.0, 'b': 0.0, 'c': 1.0}
