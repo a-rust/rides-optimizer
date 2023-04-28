@@ -31,6 +31,7 @@ def define_problem():
     ride_data_col1, ride_data_col2 = st.columns((1, 1))
     random_rides_data(ride_data_col1, ride_data_col2)
     random_constraints_data(ride_data_col1, ride_data_col2)
+    optimize()
 
 def random_rides_data(ride_data_col1, ride_data_col2):
     rides_col1 = [f'Ride_{i}' for i in range(1, 6)]
@@ -94,5 +95,16 @@ def random_constraints_data(ride_data_col1, ride_data_col2):
 
     if user_preferences not in st.session_state:
         st.session_state.user_preferences = user_preferences
+
+def optimize():
+    optimize_data = ct.OptimizeConstant(
+        all_rides=st.session_state.experimental_rides_df.iloc[:, 0].tolist(),
+        wait_times=st.session_state.experimental_rides_df.iloc[:, 1].tolist(),
+        ride_times=st.session_state.experimental_rides_df.iloc[:, 2].tolist(),
+        user_preferences=st.session_state.user_preferences    
+        )
+    
+    if optimize_data not in st.session_state:
+        st.session_state.optimize_data = optimize_data
 
 define_problem()
