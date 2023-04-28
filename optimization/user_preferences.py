@@ -20,6 +20,17 @@ class UserPreferences():
         self.max_time = max_time
         self.min_total_rides = min_total_rides
 
+    # Converts empty data types to None
+    def convert_empty_data_types(self):
+        if self.required_rides == []:
+            self.required_rides = None
+        if self.avoid_rides == []:
+            self.avoid_rides = None
+        if self.min_distinct_rides == 0:
+            self.min_distinct_rides = None
+        if self.max_ride_repeats == 0:
+            self.max_ride_repeats = None
+
     # Returns a boolean as to whether any rides are being both required and avoided at the same time
     def require_and_avoid_rides(self) -> bool:
         if self.required_rides != None and self.avoid_rides != None:
