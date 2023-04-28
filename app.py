@@ -47,11 +47,11 @@ def random_rides_data(ride_data_col1, ride_data_col2):
 def random_constraints_data(ride_data_col1, ride_data_col2):
     ride_data_col2.markdown("<h2 style='text-align: center;'>Required Constraints</h2", unsafe_allow_html=True)
     if st.session_state.optimization_problem == "Maximize Rides":
-        max_time_slider = ride_data_col2.slider("Maximum Time Constraint")
+        max_time_slider = ride_data_col2.slider("Maximum Time Constraint", value=random.randint(0, 300))
     else:
         max_time_slider = None
     if st.session_state.optimization_problem == "Minimize Time":
-        min_total_rides_slider = ride_data_col2.slider("Minimum Number of Rides Constraint")
+        min_total_rides_slider = ride_data_col2.slider("Minimum Number of Rides Constraint", value=random.randint(0, 300))
     else:
         min_total_rides_slider = None
 
