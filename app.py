@@ -62,5 +62,20 @@ def random_constraints_data(ride_data_col1, ride_data_col2):
     if min_total_rides_slider not in st.session_state:
         st.session_state.min_total_rides_slider = min_total_rides_slider
 
+    ride_data_col2.markdown("<h2 style='text-align: center;'>Optional Constraints</h2", unsafe_allow_html=True)
+
+    required_rides = ride_data_col2.multiselect("Required Rides",  options=[i for i in st.session_state.rides.Rides])
+    if required_rides not in st.session_state:
+        st.session_state.required_rides = required_rides
+    avoid_rides = ride_data_col2.multiselect("Avoid Rides",  options=[i for i in st.session_state.rides.Rides])
+    if avoid_rides not in st.session_state:
+        st.session_state.avoid_rides = avoid_rides
+    min_distinct_rides_slider = ride_data_col2.slider("Minimum Distinct Rides")
+    if min_distinct_rides_slider not in st.session_state:
+        st.session_state.min_distinct_rides_slider = min_distinct_rides_slider
+    max_ride_repeats_slider = ride_data_col2.slider("Maximum Ride Repeats")
+    if max_ride_repeats_slider not in st.session_state:
+        st.session_state.max_ride_repeats_slider = max_ride_repeats_slider
+
 
 define_problem()
