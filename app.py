@@ -81,5 +81,18 @@ def random_constraints_data(ride_data_col1, ride_data_col2):
     if max_ride_repeats_slider not in st.session_state:
         st.session_state.max_ride_repeats_slider = max_ride_repeats_slider
 
+    user_preferences=up.UserPreferences(
+        st.session_state.required_rides,
+        st.session_state.avoid_rides,
+        st.session_state.min_distinct_rides_slider,
+        st.session_state.max_ride_repeats_slider,
+        max_time_slider,
+        min_total_rides_slider
+        ) 
+    
+    user_preferences.convert_empty_data_types()
+
+    if user_preferences not in st.session_state:
+        st.session_state.user_preferences = user_preferences
 
 define_problem()
