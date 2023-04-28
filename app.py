@@ -21,7 +21,7 @@ def define_problem():
     randomize_data_btn = btn_col2.button("Randomize Data")
     if randomize_data_btn:
         del st.session_state.rides
-        del st.session_state.max_time_slider
+        del st.session_state.rand_max_time_slider
         del st.session_state.min_total_rides_slider
         del st.session_state.required_rides
         del st.session_state.avoid_rides
@@ -29,11 +29,12 @@ def define_problem():
         del st.session_state.max_ride_repeats_slider
         
     ride_data_col1, ride_data_col2 = st.columns((1, 1))
-    random_rides_data(ride_data_col1, ride_data_col2)
-    random_constraints_data(ride_data_col1, ride_data_col2)
+    random_rides_data(ride_data_col1)
+    random_required_constraints_data(ride_data_col2)
+    random_optional_constraints_data(ride_data_col2)
     optimize()
 
-def random_rides_data(ride_data_col1, ride_data_col2):
+def random_rides_data(ride_data_col1):
     rides_col1 = [f'Ride_{i}' for i in range(1, 6)]
     rides_col2 = np.random.randint(low=0, high=10, size=5)
     rides_col3 = np.random.randint(low=0, high=10, size=5)
@@ -47,11 +48,11 @@ def random_rides_data(ride_data_col1, ride_data_col2):
 
     experimental_rides_df = ride_data_col1.experimental_data_editor(st.session_state.rides, num_rows="dynamic")
 
-    if experimental_rides_df not in st.session_state:
+    if "experimental_rides_df" not in st.session_state:
         st.session_state.experimental_rides_df = experimental_rides_df
 
 
-def random_constraints_data(ride_data_col1, ride_data_col2):
+def random_required_constraints_data(ride_data_col2):
     ride_data_col2.markdown("<h2 style='text-align: center;'>Required Constraints</h2", unsafe_allow_html=True)
     if st.session_state.optimization_problem == "Maximize Rides":
         max_time_slider = ride_data_col2.slider("Maximum Time Constraint", value=random.randint(0, 300))
@@ -62,24 +63,25 @@ def random_constraints_data(ride_data_col1, ride_data_col2):
     else:
         min_total_rides_slider = None
 
-    if max_time_slider not in st.session_state:
+    if "max_time_slider" not in st.session_state:
         st.session_state.max_time_slider = max_time_slider
-    if min_total_rides_slider not in st.session_state:
+    if "min_total_rides_slider" not in st.session_state:
         st.session_state.min_total_rides_slider = min_total_rides_slider
 
+def random_optional_constraints_data(ride_data_col2):
     ride_data_col2.markdown("<h2 style='text-align: center;'>Optional Constraints</h2", unsafe_allow_html=True)
 
     required_rides = ride_data_col2.multiselect("Required Rides",  options=[i for i in st.session_state.rides.Rides], default=random.choice(st.session_state.experimental_rides_df.Rides))
-    if required_rides not in st.session_state:
+    if "required_rides" not in st.session_state:
         st.session_state.required_rides = required_rides
     avoid_rides = ride_data_col2.multiselect("Avoid Rides",  options=[i for i in st.session_state.rides.Rides], default=random.choice(st.session_state.experimental_rides_df.Rides))
-    if avoid_rides not in st.session_state:
+    if "avoid_rides" not in st.session_state:
         st.session_state.avoid_rides = avoid_rides
     min_distinct_rides_slider = ride_data_col2.slider("Minimum Distinct Rides", value=random.randint(0, len(st.session_state.experimental_rides_df.Rides)))
-    if min_distinct_rides_slider not in st.session_state:
+    if "min_distinct_rides_slider" not in st.session_state:
         st.session_state.min_distinct_rides_slider = min_distinct_rides_slider
     max_ride_repeats_slider = ride_data_col2.slider("Maximum Ride Repeats", value=random.randint(0, len(st.session_state.experimental_rides_df.Rides)))
-    if max_ride_repeats_slider not in st.session_state:
+    if "max_ride_repeats_slider" not in st.session_state:
         st.session_state.max_ride_repeats_slider = max_ride_repeats_slider
 
     user_preferences=up.UserPreferences(
@@ -87,8 +89,8 @@ def random_constraints_data(ride_data_col1, ride_data_col2):
         st.session_state.avoid_rides,
         st.session_state.min_distinct_rides_slider,
         st.session_state.max_ride_repeats_slider,
-        max_time_slider,
-        min_total_rides_slider
+        st.session_state.max_time_slider,
+        st.session_state.min_total_rides_slider
         ) 
     
     user_preferences.convert_empty_data_types()
@@ -106,5 +108,6 @@ def optimize():
     
     if optimize_data not in st.session_state:
         st.session_state.optimize_data = optimize_data
+  
 
 define_problem()
