@@ -21,6 +21,8 @@ def define_problem():
     randomize_data_btn = btn_col2.button("Randomize Data")
     if randomize_data_btn:
         del st.session_state.rides
+        del st.session_state.max_time_slider
+        del st.session_state.min_total_rides_slider
         
     ride_data_col1, ride_data_col2 = st.columns((1, 1))
     random_rides_data(ride_data_col1, ride_data_col2)
@@ -54,6 +56,11 @@ def random_constraints_data(ride_data_col1, ride_data_col2):
         min_total_rides_slider = ride_data_col2.slider("Minimum Number of Rides Constraint", value=random.randint(0, 300))
     else:
         min_total_rides_slider = None
+
+    if max_time_slider not in st.session_state:
+        st.session_state.max_time_slider = max_time_slider
+    if min_total_rides_slider not in st.session_state:
+        st.session_state.min_total_rides_slider = min_total_rides_slider
 
 
 define_problem()
