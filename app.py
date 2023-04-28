@@ -14,6 +14,12 @@ def define_problem():
 
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
+    
+    # Have to create empty side columns to keep button centered
+    empty_col1, btn_col2, empty_col3 = st.columns((1, 1, 1))
+    randomize_data_btn = btn_col2.button("Randomize Data")
+    if randomize_data_btn:
+        del st.session_state.rides
         
     ride_data_col1, ride_data_col2 = st.columns((1, 1))
     random_rides_data(ride_data_col1, ride_data_col2)
