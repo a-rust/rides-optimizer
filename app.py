@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import random
 import optimization.user_preferences as up
 import optimization.constant_times as ct
 
@@ -23,6 +24,7 @@ def define_problem():
         
     ride_data_col1, ride_data_col2 = st.columns((1, 1))
     random_rides_data(ride_data_col1, ride_data_col2)
+    random_constraints_data(ride_data_col1, ride_data_col2)
 
 def random_rides_data(ride_data_col1, ride_data_col2):
     rides_col1 = [f'Ride_{i}' for i in range(1, 6)]
@@ -40,5 +42,18 @@ def random_rides_data(ride_data_col1, ride_data_col2):
 
     if experimental_rides_df not in st.session_state:
         st.session_state.experimental_rides_df = experimental_rides_df
+
+
+def random_constraints_data(ride_data_col1, ride_data_col2):
+    ride_data_col2.markdown("<h2 style='text-align: center;'>Required Constraints</h2", unsafe_allow_html=True)
+    if st.session_state.optimization_problem == "Maximize Rides":
+        max_time_slider = ride_data_col2.slider("Maximum Time Constraint")
+    else:
+        max_time_slider = None
+    if st.session_state.optimization_problem == "Minimize Time":
+        min_total_rides_slider = ride_data_col2.slider("Minimum Number of Rides Constraint")
+    else:
+        min_total_rides_slider = None
+
 
 define_problem()
