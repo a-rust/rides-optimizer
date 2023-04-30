@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import random
 import optimization.user_preferences as up
 import optimization.constant_times as ct
@@ -118,5 +119,7 @@ def optimize(rides, user_preferences):
         results = optimize_data.maximize_rides(ride_weights)
     elif st.session_state.optimization_problem == "Minimize Time":
         results = optimize_data.minimize_time(ride_weights)
+    plt.bar(results.keys(), results.values(), )
+    st.pyplot(plt)
 
 define_problem()
