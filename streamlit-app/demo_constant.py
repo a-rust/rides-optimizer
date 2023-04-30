@@ -7,16 +7,7 @@ import optimization.user_preferences as up
 import optimization.constant_times as ct
 
 
-def set_park():
-    park = st.sidebar.selectbox(label="Park", options=("Demo", "Empty for now"))
-    if park == "Demo":
-        demo()
-
-def demo():
-    st.markdown("<h1 style='text-align: center;'>Demo</h1", unsafe_allow_html=True)
-
-    time_assumption = st.selectbox("Please select the time assumptions to be used", ("Constant", "Dynamic"), help="Do you want to assume constant or dynamic wait and ride times?")
-
+def main():
     optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent at the park?")
 
     if optimization_problem not in st.session_state:
@@ -131,4 +122,3 @@ def optimize(rides, user_preferences, result_col2):
     except:
         st.error(body="No feasible solution. Please double check the constraints for any contradiction")
 
-set_park()
