@@ -29,7 +29,7 @@ def main():
         
     ride_data_col1, result_col2 = st.columns((1, 1))
     rides = demo_random_rides_data(ride_data_col1)
-    required_constraints = random_required_constraints_data()
+    required_constraints = random_required_constraints_data(rides)
     user_preferences = random_optional_constraints_data(rides, required_constraints)
     optimize(rides, user_preferences, result_col2)
 
@@ -49,20 +49,20 @@ def demo_random_rides_data(ride_data_col1):
 
     return experimental_rides_df
 
-def random_required_constraints_data():
+def random_required_constraints_data(rides):
     st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
     if st.session_state.optimization_problem == "Maximize Rides":
         rand_max_time_slider = random.randint(0, 300)
         if "rand_max_time_slider" not in st.session_state:
             st.session_state.rand_max_time_slider = rand_max_time_slider
-        max_time_slider = st.sidebar.slider("Maximum Time Constraint", value=st.session_state.rand_max_time_slider, help="What is the maximum total amount of time you'd like to spend waiting and riding rides?")
+        max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, value=st.session_state.rand_max_time_slider, help="What is the maximum total amount of time you'd like to spend waiting and riding rides?")
     else:
         max_time_slider = None
     if st.session_state.optimization_problem == "Minimize Time":
-        rand_min_total_rides_slider = random.randint(0, 300)
+        rand_min_total_rides_slider = random.randint(0, len(rides.Rides))
         if "rand_min_total_rides_slider" not in st.session_state:
             st.session_state.rand_min_total_rides_slider = rand_min_total_rides_slider
-        min_total_rides_slider = st.sidebar.slider("Minimum Number of Rides Constraint", value=st.session_state.rand_min_total_rides_slider, help="What is the minimum total number of rides you'd like to go on?")
+        min_total_rides_slider = st.sidebar.slider("Minimum Number of Rides Constraint", max_value=len(rides.Rides), value=st.session_state.rand_min_total_rides_slider, help="What is the minimum total number of rides you'd like to go on?")
     else:
         min_total_rides_slider = None
 
