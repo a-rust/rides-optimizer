@@ -7,7 +7,12 @@ import optimization.user_preferences as up
 import optimization.constant_times as ct
 
 
-def define_problem():
+def set_park():
+    park = st.sidebar.selectbox(label="Park", options=("Demo", "Empty for now"))
+    if park == "Demo":
+        demo()
+
+def demo():
     st.markdown("<h1 style='text-align: center;'>Demo</h1", unsafe_allow_html=True)
 
     time_assumption = st.selectbox("Please select the time assumptions to be used", ("Constant", "Dynamic"), help="Do you want to assume constant or dynamic wait and ride times?")
@@ -32,12 +37,12 @@ def define_problem():
         del st.session_state.rand_max_ride_repeats
         
     ride_data_col1, result_col2 = st.columns((1, 1))
-    rides = random_rides_data(ride_data_col1)
+    rides = demo_random_rides_data(ride_data_col1)
     required_constraints = random_required_constraints_data()
     user_preferences = random_optional_constraints_data(rides, required_constraints)
     optimize(rides, user_preferences, result_col2)
 
-def random_rides_data(ride_data_col1):
+def demo_random_rides_data(ride_data_col1):
     rides_col1 = [f'Ride_{i}' for i in range(1, 6)]
     rides_col2 = np.random.randint(low=0, high=10, size=5)
     rides_col3 = np.random.randint(low=0, high=10, size=5)
@@ -126,4 +131,4 @@ def optimize(rides, user_preferences, result_col2):
     except:
         st.error(body="No feasible solution. Please double check the constraints for any contradiction")
 
-define_problem()
+set_park()
