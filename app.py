@@ -10,9 +10,9 @@ import optimization.constant_times as ct
 def define_problem():
     st.markdown("<h1 style='text-align: center;'>Demo</h1", unsafe_allow_html=True)
 
-    time_assumption = st.selectbox("Please select the time assumptions to be used", ("Constant", "Dynamic"))
+    time_assumption = st.selectbox("Please select the time assumptions to be used", ("Constant", "Dynamic"), help="Do you want to assume constant or dynamic wait and ride times?")
 
-    optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"))
+    optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the amount of time spent at the park?")
 
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
@@ -47,52 +47,52 @@ def random_rides_data(ride_data_col1):
     if "rides" not in st.session_state:
         st.session_state.rides = rides
 
-    ride_data_col1.markdown("<h2 style='text-align: center;'>Rides</h2", unsafe_allow_html=True)
+    ride_data_col1.markdown("<h2 style='text-align: center;'>Rides</h2", unsafe_allow_html=True, help="Feel free to add, delete, or edit the rides data")
 
     experimental_rides_df = ride_data_col1.experimental_data_editor(st.session_state.rides, num_rows="dynamic", key="user_rides")
 
     return experimental_rides_df
 
 def random_required_constraints_data(ride_data_col2):
-    ride_data_col2.markdown("<h2 style='text-align: center;'>Required Constraints</h2", unsafe_allow_html=True)
+    ride_data_col2.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
     if st.session_state.optimization_problem == "Maximize Rides":
         rand_max_time_slider = random.randint(0, 300)
         if "rand_max_time_slider" not in st.session_state:
             st.session_state.rand_max_time_slider = rand_max_time_slider
-        max_time_slider = ride_data_col2.slider("Maximum Time Constraint", value=st.session_state.rand_max_time_slider)
+        max_time_slider = ride_data_col2.slider("Maximum Time Constraint", value=st.session_state.rand_max_time_slider, help="What is the maximum total amount of time you'd like to spend waiting and riding rides?")
     else:
         max_time_slider = None
     if st.session_state.optimization_problem == "Minimize Time":
         rand_min_total_rides_slider = random.randint(0, 300)
         if "rand_min_total_rides_slider" not in st.session_state:
             st.session_state.rand_min_total_rides_slider = rand_min_total_rides_slider
-        min_total_rides_slider = ride_data_col2.slider("Minimum Number of Rides Constraint", value=st.session_state.rand_min_total_rides_slider)
+        min_total_rides_slider = ride_data_col2.slider("Minimum Number of Rides Constraint", value=st.session_state.rand_min_total_rides_slider, help="What is the minimum total number of rides you'd like to go on?")
     else:
         min_total_rides_slider = None
 
     return [max_time_slider, min_total_rides_slider]
 
 def random_optional_constraints_data(ride_data_col2, rides, required_constraints):
-    ride_data_col2.markdown("<h2 style='text-align: center;'>Optional Constraints</h2", unsafe_allow_html=True)
+    ride_data_col2.markdown("<h2 style='text-align: center;'>Optional Constraints</h2", unsafe_allow_html=True, help="These constraints are optional, but make the optimization much more interesting")
     rand_required_rides = random.choice(rides.Rides)
     if "rand_required_rides" not in st.session_state:
         st.session_state.rand_required_rides = rand_required_rides
-    required_rides = ride_data_col2.multiselect("Required Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_required_rides)
+    required_rides = ride_data_col2.multiselect("Required Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_required_rides, help="Which rides would you like to go on at least once?")
 
     rand_avoid_rides = random.choice(rides.Rides)
     if "rand_avoid_rides" not in st.session_state:
         st.session_state.rand_avoid_rides = rand_avoid_rides
-    avoid_rides = ride_data_col2.multiselect("Avoid Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_avoid_rides)
+    avoid_rides = ride_data_col2.multiselect("Avoid Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_avoid_rides, help="Which rides would you like to avoid entirely?")
 
     rand_min_distinct_rides = random.randint(0, len(rides.Rides))
     if "rand_min_distinct_rides" not in st.session_state:
         st.session_state.rand_min_distinct_rides = rand_min_distinct_rides
-    min_distinct_rides_slider = ride_data_col2.slider("Minimum Distinct Rides", value=st.session_state.rand_min_distinct_rides)
+    min_distinct_rides_slider = ride_data_col2.slider("Minimum Distinct Rides", value=st.session_state.rand_min_distinct_rides, help="What is the minimum number of distinct rides you'd like to go on?")
 
     rand_max_ride_repeats = random.randint(0, len(rides.Rides))
     if "rand_max_ride_repeats" not in st.session_state:
         st.session_state.rand_max_ride_repeats = rand_max_ride_repeats
-    max_ride_repeats_slider = ride_data_col2.slider("Maximum Ride Repeats", value=st.session_state.rand_max_ride_repeats)
+    max_ride_repeats_slider = ride_data_col2.slider("Maximum Ride Repeats", value=st.session_state.rand_max_ride_repeats, help="What is the maximum number of times you'd like to ride any single ride?")
 
     user_preferences=up.UserPreferences(
         required_rides,
