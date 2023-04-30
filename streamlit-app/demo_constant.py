@@ -53,7 +53,8 @@ def demo_random_rides_data(ride_data_col1):
 def random_required_constraints_data(rides):
     st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
     if st.session_state.optimization_problem == "Maximize Rides":
-        rand_max_time_slider = random.randint(0, 300)
+        # Artificial lower bound on max time constraint to avoid infeasibility of randomly generated data
+        rand_max_time_slider = random.randint(10*len(rides.Rides), 300)
         if "rand_max_time_slider" not in st.session_state:
             st.session_state.rand_max_time_slider = rand_max_time_slider
         max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, value=st.session_state.rand_max_time_slider, help="What is the maximum total amount of time you'd like to spend waiting and riding rides?")
