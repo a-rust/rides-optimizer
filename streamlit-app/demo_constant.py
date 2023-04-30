@@ -9,7 +9,6 @@ import optimization.constant_times as ct
 
 def main():
     optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent at the park?")
-
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
     
@@ -75,10 +74,16 @@ def random_optional_constraints_data(rides, required_constraints):
         st.session_state.rand_required_rides = rand_required_rides
     required_rides = st.sidebar.multiselect("Required Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_required_rides, help="Which rides would you like to go on at least once?")
 
-    rand_avoid_rides = random.choice(rides.Rides)
+    # Prevent random avoid ride to be distinct from random required ride
+    rand_avoid_rides = random.choice(list(set(rides.Rides).difference(set(required_rides))))
     if "rand_avoid_rides" not in st.session_state:
         st.session_state.rand_avoid_rides = rand_avoid_rides
     avoid_rides = st.sidebar.multiselect("Avoid Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_avoid_rides, help="Which rides would you like to avoid entirely?")
+
+    # Prevent user from requiring and avoiding the same ride(s)
+    rides_intersection = list(set(required_rides).intersection(set(avoid_rides)))
+    if rides_intersection != []:
+        st.error("Cannot require and avoid the same ride")
 
     rand_min_distinct_rides = random.randint(0, len(rides.Rides))
     if "rand_min_distinct_rides" not in st.session_state:
