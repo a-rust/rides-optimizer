@@ -85,10 +85,15 @@ def random_optional_constraints_data(rides, required_constraints):
     if rides_intersection != []:
         st.error("Cannot require and avoid the same ride")
 
-    rand_min_distinct_rides = random.randint(0, len(rides.Rides))
+    rand_min_distinct_rides = random.randint(0, len(rides.Rides) - len(avoid_rides))
     if "rand_min_distinct_rides" not in st.session_state:
         st.session_state.rand_min_distinct_rides = rand_min_distinct_rides
-    min_distinct_rides_slider = st.sidebar.slider("Minimum Distinct Rides", value=st.session_state.rand_min_distinct_rides, help="What is the minimum number of distinct rides you'd like to go on?")
+    min_distinct_rides_slider = st.sidebar.slider("Minimum Distinct Rides", max_value=len(rides.Rides), value=st.session_state.rand_min_distinct_rides, help="What is the minimum number of distinct rides you'd like to go on?")
+
+    #Prevent user from requiring to go on X > (N - A) distinct rides, where N is the total number of distinct rides, and A is the size of the avoid rides list
+    if min_distinct_rides_slider > len(rides.Rides) - len(avoid_rides):
+        st.error("Cannot set the minimum number of distinct rides to be more than the number of total rides minus the number of avoided rides")
+
 
     rand_max_ride_repeats = random.randint(0, len(rides.Rides))
     if "rand_max_ride_repeats" not in st.session_state:
