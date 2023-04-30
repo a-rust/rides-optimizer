@@ -35,9 +35,9 @@ def main():
     optimize(rides, user_preferences, result_col2)
 
 def demo_random_rides_data(ride_data_col1):
-    rides_col1 = [f'Ride_{i}' for i in range(1, 6)]
-    rides_col2 = np.random.randint(low=0, high=10, size=5)
-    rides_col3 = np.random.randint(low=0, high=10, size=5)
+    rides_col1 = [f'Ride_{i}' for i in range(1, 8)]
+    rides_col2 = np.random.randint(low=0, high=10, size=7)
+    rides_col3 = np.random.randint(low=0, high=10, size=7)
 
     rides = pd.DataFrame({"Rides": rides_col1, "Wait Times": rides_col2, "Ride Times": rides_col3})
 
@@ -125,14 +125,19 @@ def optimize(rides, user_preferences, result_col2):
         )
 
     ride_weights = optimize_data.set_ride_weights()
+
+    result_col2.markdown("<h2 style='text-align: center;'>Results</h2", unsafe_allow_html=True, help="Watch how changing the inputs to the optimization problem affects the results. If you get an error, try and spot where certain constraints contradict each other")
     if st.session_state.optimization_problem == "Maximize Rides":
         results = optimize_data.maximize_rides(ride_weights)
+        try:
+            plt.bar(results.keys(), results.values())
+            result_col2.pyplot(plt)
+        except:
+            st.error(body="No feasible solution. If this is a stand-alone error message, consider increasing the max time constraint")
     elif st.session_state.optimization_problem == "Minimize Time":
         results = optimize_data.minimize_time(ride_weights)
-    result_col2.markdown("<h2 style='text-align: center;'>Results</h2", unsafe_allow_html=True, help="Watch how changing the inputs to the optimization problem affects the results. If you get an error, try and spot where certain constraints contradict each other")
-    try:
-        plt.bar(results.keys(), results.values())
-        result_col2.pyplot(plt)
-    except:
-        st.error(body="No feasible solution. Please double check the constraints for any contradiction")
-
+        try:
+            plt.bar(results.keys(), results.values())
+            result_col2.pyplot(plt)
+        except:
+            st.error(body="No feasible solution. Please double check the constraints for any contradiction")
