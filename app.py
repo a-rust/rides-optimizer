@@ -119,7 +119,10 @@ def optimize(rides, user_preferences):
         results = optimize_data.maximize_rides(ride_weights)
     elif st.session_state.optimization_problem == "Minimize Time":
         results = optimize_data.minimize_time(ride_weights)
-    plt.bar(results.keys(), results.values(), )
-    st.pyplot(plt)
+    try:
+        plt.bar(results.keys(), results.values(), )
+        st.pyplot(plt)
+    except:
+        st.error(body="No feasible solution. Please double check the constraints for any contradiction")
 
 define_problem()
