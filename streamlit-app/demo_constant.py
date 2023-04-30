@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
+
+import helper
 import optimization.user_preferences as up
 import optimization.constant_times as ct
 
@@ -61,7 +63,7 @@ def random_required_constraints_data(rides):
         rand_min_total_rides_slider = random.randint(0, len(rides.Rides))
         if "rand_min_total_rides_slider" not in st.session_state:
             st.session_state.rand_min_total_rides_slider = rand_min_total_rides_slider
-        min_total_rides_slider = st.sidebar.slider("Minimum Number of Rides Constraint", max_value=len(rides.Rides), value=st.session_state.rand_min_total_rides_slider, help="What is the minimum total number of rides you'd like to go on?")
+        min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides.Rides), value=st.session_state.rand_min_total_rides_slider, help="What is the minimum total number of rides you'd like to go on?")
     else:
         min_total_rides_slider = None
 
@@ -81,24 +83,26 @@ def random_optional_constraints_data(rides, required_constraints):
     avoid_rides = st.sidebar.multiselect("Avoid Rides",  options=[i for i in rides.Rides], default=st.session_state.rand_avoid_rides, help="Which rides would you like to avoid entirely?")
 
     # Prevent user from requiring and avoiding the same ride(s)
-    rides_intersection = list(set(required_rides).intersection(set(avoid_rides)))
-    if rides_intersection != []:
-        st.error("Cannot require and avoid the same ride")
+    helper.require_avoid_contradiction(required_rides, avoid_rides)
 
-    rand_min_distinct_rides = random.randint(0, len(rides.Rides) - len(avoid_rides))
+    # The rand_min_distinct_rides should not be larger than either (# of rides - # of avoided rides) or the min total rides (in the case of a minimization problem)
+    if required_constraints[1] != None:
+        rand_min_distinct_rides = random.randint(0, min(len(rides.Rides) - len(avoid_rides), required_constraints[1]))
+    else: 
+        rand_min_distinct_rides = random.randint(1, len(rides.Rides) - len(avoid_rides))
     if "rand_min_distinct_rides" not in st.session_state:
         st.session_state.rand_min_distinct_rides = rand_min_distinct_rides
-    min_distinct_rides_slider = st.sidebar.slider("Minimum Distinct Rides", max_value=len(rides.Rides), value=st.session_state.rand_min_distinct_rides, help="What is the minimum number of distinct rides you'd like to go on?")
+    min_distinct_rides_slider = st.sidebar.slider("Minimum Distinct Rides", min_value=1, max_value=len(rides.Rides), value=st.session_state.rand_min_distinct_rides, help="What is the minimum number of distinct rides you'd like to go on?")
 
-    #Prevent user from requiring to go on X > (N - A) distinct rides, where N is the total number of distinct rides, and A is the size of the avoid rides list
-    if min_distinct_rides_slider > len(rides.Rides) - len(avoid_rides):
-        st.error("Cannot set the minimum number of distinct rides to be more than the number of total rides minus the number of avoided rides")
+    helper.min_distinct_rides_contradiction(min_distinct_rides_slider, len(rides.Rides), len(avoid_rides))
 
-
-    rand_max_ride_repeats = random.randint(0, len(rides.Rides))
+    rand_max_ride_repeats = random.randint(1, len(rides.Rides))
     if "rand_max_ride_repeats" not in st.session_state:
         st.session_state.rand_max_ride_repeats = rand_max_ride_repeats
-    max_ride_repeats_slider = st.sidebar.slider("Maximum Ride Repeats", value=st.session_state.rand_max_ride_repeats, help="What is the maximum number of times you'd like to ride any single ride?")
+    max_ride_repeats_slider = st.sidebar.slider("Maximum Ride Repeats", min_value=1, value=st.session_state.rand_max_ride_repeats, help="What is the maximum number of times you'd like to ride any single ride?")
+
+    if st.session_state.optimization_problem == "Minimize Time":
+        helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides.Rides))
 
     user_preferences=up.UserPreferences(
         required_rides,
