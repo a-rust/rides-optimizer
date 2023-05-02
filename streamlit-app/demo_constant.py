@@ -110,7 +110,7 @@ def random_optional_constraints_data(rides, required_constraints):
         avoid_rides,
         min_distinct_rides_slider,
         max_ride_repeats_slider,
-        required_constraints[0],
+        {1: required_constraints[0]},
         required_constraints[1]
         ) 
     

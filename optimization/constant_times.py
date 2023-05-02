@@ -63,7 +63,7 @@ class OptimizeConstant():
         # Constraint: the sum of the dot product of the rides and their corresponding weights must be at most the user's max time constraint
         #   - In this case, the user must set a max time constraint, or else the solution would be unbounded
         if self.max_time != None:
-            prob += pulp.lpDot([rides[i] for i in ride_weights.keys()], [ride_weights.get(i) for i in ride_weights.keys()]) <= self.max_time
+            prob += pulp.lpDot([rides[i] for i in ride_weights.keys()], [ride_weights.get(i) for i in ride_weights.keys()]) <= self.max_time[1]
         else:
             return None
         
