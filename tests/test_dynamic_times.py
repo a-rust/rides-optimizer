@@ -34,3 +34,11 @@ def test_maximize_with_avoid():
     # Since we avoid ride 'a' all together, then it must be the case that the sum of ride_(a, j) = 0 for all time steps j
     #   - In this case, 'b' is the next best option to allocate all the space to in time step 1, and time step 2 remains unchanged
     assert park.maximize_rides(ride_weights) == {('a', 1): 0.0, ('a', 2): 0.0, ('b', 1): 11.0, ('b', 2): 16.0, ('c', 1): 0.0, ('c', 2): 0.0}
+
+def test_maximize_with_max_time_constraint():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=10, max_time=[100, 80], min_total_rides=None)
+    park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Since we set a max ride repeat constraint of 10, then it must be the case that ('a', 1)+('a', 2) <= 10, ('b', 1)+('b', 2) <= 10, and ('c', 1)+('c', 2) <= 10
+    #   - In this case, 'a' should be maxed out in time step one, and 'b' should be split amongst both time steps to allow 'c' to reach 7 total rides over both time steps
+    assert park.maximize_rides(ride_weights) == {('a', 1): 10.0, ('a', 2): 0.0, ('b', 1): 4.0, ('b', 2): 6.0, ('c', 1): 1.0, ('c', 2): 7.0}
