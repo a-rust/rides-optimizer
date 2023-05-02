@@ -25,3 +25,14 @@ class OptimizeDynamic():
     #   - Example: {a: [10, 15], b: [12, 13]} implies that the total times of rides a, b at the first time step are 10, 12, respectively, and the total times of rides of a, b at the second time step are 15, 13, respectively  
     def set_ride_weights(self) -> dict:
         return {self.all_rides[i]: [self.wait_times.get(j)[i] + self.ride_times.get(j)[i] for j in range(1, self.time_steps+1)] for i in range(len(self.all_rides)) for j in range(1, self.time_steps)}
+
+# Maximizes the total number of rides to go on over all time steps
+    def maximize_rides(self, ride_weights: dict) -> list | None:
+
+        prob = pulp.LpProblem("Maximize the number of total rides to go on over dynamically changing time periods", pulp.LpMaximize)
+
+        # Variable: ride_time_step_(i, j) will represent the number of times ride i is rode during time period j
+        rides = pulp.LpVariable.dicts("ride_time_step", [(ride, time_period) for ride in ride_weights.keys() for  time_period in range(1, self.time_steps+1)], lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
+
+        # Objective function: maximize the sum of ride_i's 
+        prob += pulp.lpSum(rides[(ride, time_period)] for ride in ride_weights.keys() for time_period in range(1, self.time_steps+1))
