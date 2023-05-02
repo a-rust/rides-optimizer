@@ -33,6 +33,10 @@ class OptimizeConstant():
         if self.max_ride_repeats != None and self.min_total_rides != None:
             if (len(self.all_rides) * int(self.max_ride_repeats) < self.min_total_rides):
                 valid = True
+
+        if self.min_distinct_rides != None and self.avoid_rides != None:
+            if len(self.all_rides) < int(self.min_distinct_rides) + len(self.avoid_rides):
+                valid = True
         return valid
     
     # --------------------

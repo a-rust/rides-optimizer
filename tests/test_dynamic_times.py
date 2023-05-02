@@ -57,3 +57,10 @@ def test_minimize_no_preferences():
     ride_weights = park.set_ride_weights()
     # Since we set the min total rides constraint to 30, and since 'a' in time step 1 and 'b' in time step 2 are tied for the lowest weights, then it would be optimal to set ('a', 1) = 30 and everything else to 0, or to set ('b', 2) = 30 and everything else to 0, or to use any combination of non-zero values for ('a', 1) and ('b', 2) and set everything else to 0
     assert park.minimize_time(ride_weights) == {('a', 1): 30.0, ('a', 2): 0.0, ('b', 1): 0.0, ('b', 2): 0.0, ('c', 1): 0.0, ('c', 2): 0.0}
+
+def test_minimize_min_distinct_rides_avoid_contradiction():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=['a', 'b'], min_distinct_rides=2, max_ride_repeats=None, max_time=None, min_total_rides=30)
+    park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Since there are only 3 distinct rides in total, then avoiding 2 of them ('a' and 'b'), means we only have 1 distinct ride left, 'c'. And requiring to go on at least 2 distinct rides with the only option being 'c' leads to an infeasible solution due to a preference/constraint contradiction
+    assert park.minimize_time(ride_weights) == None

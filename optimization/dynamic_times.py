@@ -29,12 +29,29 @@ class OptimizeDynamic():
     def set_ride_weights(self) -> dict:
         return {self.all_rides[i]: [self.wait_times.get(j)[i] + self.ride_times.get(j)[i] for j in range(1, self.time_steps+1)] for i in range(len(self.all_rides)) for j in range(1, self.time_steps)}
     
+    # Returns a bool as to whether the a combination of user preferences leads to a contradiction 
+    def set_contradiction_value(self) -> bool:
+        valid = False
+        # If the min total rides is greater than the product of the size of all distinct rides and the max ride repeats, then contradiction as no feasible solution exists
+        if self.max_ride_repeats != None and self.min_total_rides != None:
+            if (len(self.all_rides) * int(self.max_ride_repeats) < self.min_total_rides):
+                valid = True
+
+        if self.min_distinct_rides != None and self.avoid_rides != None:
+            if len(self.all_rides) < int(self.min_distinct_rides) + len(self.avoid_rides):
+                valid = True
+        return valid
+
     # --------------------
     # Maximization Methods
     # --------------------
 
     # Maximizes the total number of rides to go on over all time steps
     def maximize_rides(self, ride_weights: dict) -> list | None:
+
+        # Deal with the possibility of a preference contradiction before moving forward
+        if self.set_contradiction_value():
+            return None
 
         prob = pulp.LpProblem("Maximize the number of total rides to go on over dynamically changing time steps", pulp.LpMaximize)
 
@@ -98,6 +115,10 @@ class OptimizeDynamic():
     # Minimizes the amount of time spent waiting and riding rides over all time steps
     def minimize_time(self, ride_weights: dict) -> list | None:
         prob = pulp.LpProblem("Minimize the total amount of time waiting and riding rides", pulp.LpMinimize)
+
+        # Deal with the possibility of a preference contradiction before moving forward
+        if self.set_contradiction_value():
+            return None
 
         # Variable: defined the same as in the maximization problem
         rides = pulp.LpVariable.dicts("ride_time_step", [(ride, time_period) for ride in ride_weights.keys() for  time_period in range(1, self.time_steps+1)], lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
