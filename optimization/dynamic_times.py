@@ -29,10 +29,22 @@ class OptimizeDynamic():
 # Maximizes the total number of rides to go on over all time steps
     def maximize_rides(self, ride_weights: dict) -> list | None:
 
-        prob = pulp.LpProblem("Maximize the number of total rides to go on over dynamically changing time periods", pulp.LpMaximize)
+        prob = pulp.LpProblem("Maximize the number of total rides to go on over dynamically changing time steps", pulp.LpMaximize)
 
         # Variable: ride_time_step_(i, j) will represent the number of times ride i is rode during time period j
         rides = pulp.LpVariable.dicts("ride_time_step", [(ride, time_period) for ride in ride_weights.keys() for  time_period in range(1, self.time_steps+1)], lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
 
         # Objective function: maximize the sum of ride_i's 
         prob += pulp.lpSum(rides[(ride, time_period)] for ride in ride_weights.keys() for time_period in range(1, self.time_steps+1))
+
+        # Constraint: the sum of the dot product of the rides and their corresponding weights in each time step must be at most the user's max time constraint
+        if self.max_time != None:
+            for time_step in range(1, self.time_steps+1):
+                prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys()), [rides[(ride, time_step)] for ride in ride_weights.keys()]) <= self.max_time[time_step-1]
+
+        prob.solve()
+
+        if pulp.LpStatus[prob.status] == "Optimal":
+            return ({(ride, time_step): pulp.value(rides[ride, time_step]) for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)})
+        else:
+            return None        
