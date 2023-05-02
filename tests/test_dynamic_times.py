@@ -35,10 +35,18 @@ def test_maximize_with_avoid():
     #   - In this case, 'b' is the next best option to allocate all the space to in time step 1, and time step 2 remains unchanged
     assert park.maximize_rides(ride_weights) == {('a', 1): 0.0, ('a', 2): 0.0, ('b', 1): 11.0, ('b', 2): 16.0, ('c', 1): 0.0, ('c', 2): 0.0}
 
-def test_maximize_with_max_time_constraint():
+def test_maximize_with_max_ride_repeat_constraint():
     user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=10, max_time=[100, 80], min_total_rides=None)
     park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
     ride_weights = park.set_ride_weights()
     # Since we set a max ride repeat constraint of 10, then it must be the case that ('a', 1)+('a', 2) <= 10, ('b', 1)+('b', 2) <= 10, and ('c', 1)+('c', 2) <= 10
     #   - In this case, 'a' should be maxed out in time step one, and 'b' should be split amongst both time steps to allow 'c' to reach 7 total rides over both time steps
     assert park.maximize_rides(ride_weights) == {('a', 1): 10.0, ('a', 2): 0.0, ('b', 1): 4.0, ('b', 2): 6.0, ('c', 1): 1.0, ('c', 2): 7.0}
+
+def test_maximize_with_min_distinct_rides_constraint():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time=[100, 80], min_total_rides=None)
+    park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Since we set the min distinct rides constraint to 3, then 'a', 'b', and 'c' must be rode at least once (over both time steps)
+    #   - In this case, 'c' is cheaper in time step 2, and it is thus optimal to allocate space for one unit of 'c' from 2 units of 'b' in time step 2
+    assert park.maximize_rides(ride_weights) == {('a', 1): 20.0, ('a', 2): 0.0, ('b', 1): 0.0, ('b', 2): 14.0, ('c', 1): 0.0, ('c', 2): 1.0}

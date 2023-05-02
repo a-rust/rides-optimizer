@@ -34,6 +34,10 @@ class OptimizeDynamic():
         # Variable: ride_time_step_(i, j) will represent the number of times ride i is rode during time period j
         rides = pulp.LpVariable.dicts("ride_time_step", [(ride, time_period) for ride in ride_weights.keys() for  time_period in range(1, self.time_steps+1)], lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
 
+        # Variable: ride_rode_i will be an LpBinary that is used in the minimum distinct rides constraint (set by the user)
+        rides_rode = pulp.LpVariable.dicts("ride_rode",
+                                        ride_weights.keys(), cat=pulp.LpBinary)
+
         # Objective function: maximize the sum of ride_i's 
         prob += pulp.lpSum(rides[(ride, time_period)] for ride in ride_weights.keys() for time_period in range(1, self.time_steps+1))
 
@@ -59,8 +63,19 @@ class OptimizeDynamic():
                     prob += pulp.lpSum(rides[i, j] for j in range(1, self.time_steps+1)) == 0
 
         # Constraint: The sum of a ride over all time steps must be less than the max ride repeats preference set by the user
-        for i in ride_weights.keys():
-            prob += pulp.lpSum(rides[i, time_step] for time_step in range(1, self.time_steps+1)) <= self.max_ride_repeats
+        if self.max_ride_repeats != None:
+            for i in ride_weights.keys():
+                prob += pulp.lpSum(rides[i, time_step] for time_step in range(1, self.time_steps+1)) <= self.max_ride_repeats
+
+        # Constraint: the number of non-zero sums of ride_(i, j) for all time steps j must be at least the user's minimum distinct number of rides constraint
+        if self.min_distinct_rides != None:
+            for i in ride_weights.keys():
+                # Case 1: rides[i] = 0 implies rides_rode[i] = 0
+                # Case 2: rides[i] >= 1 implies unique_ride[i] >= 1
+                    #   - Since unique_ride[i] is binary, then case 2 implies unique_ride[i] = 1
+                prob += pulp.lpSum(rides[i, time_step] for time_step in range(1, self.time_steps+1)) >= 1 * rides_rode[i]
+                # The number of distinct rides rode (counting all time steps together, not individually) must be at least the user's minimum distinct number of rides constraint
+                prob += pulp.lpSum(rides_rode) >= self.min_distinct_rides
 
         prob.solve()
 
