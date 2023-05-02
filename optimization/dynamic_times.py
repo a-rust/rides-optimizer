@@ -42,6 +42,22 @@ class OptimizeDynamic():
             for time_step in range(1, self.time_steps+1):
                 prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys()), [rides[(ride, time_step)] for ride in ride_weights.keys()]) <= self.max_time[time_step-1]
 
+        # Constraint: ride_(i, j) >= 1 for at least one time step j if the user wants to ride ride_i at least once
+        # Constraint: ride_(i, j) = 0 for all time steps j if the user wants to avoid ride_i all together
+        # User cannot require to go on a ride while also avoiding it
+        if self.require_and_avoid:
+                return None 
+        if self.required_rides != None:
+            for i in self.all_rides:
+                if i in self.required_rides:
+                    # If the sum of rides[i, j] >= 1 for all time steps j, then the required constraint was satisfied
+                    prob += pulp.lpSum(rides[i, j] for j in range(1, self.time_steps+1)) >= 1
+        if self.avoid_rides != None:
+            for i in self.all_rides:
+                if i in self.avoid_rides:
+                    # If the sum of rides[i, j] = 0 for all time steps j, then the avoid constraint was satisfied
+                    prob += pulp.lpSum(rides[i, j] for j in range(1, self.time_steps+1)) == 0        
+
         prob.solve()
 
         if pulp.LpStatus[prob.status] == "Optimal":
