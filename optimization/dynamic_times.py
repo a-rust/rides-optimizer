@@ -99,8 +99,21 @@ class OptimizeDynamic():
     def minimize_time(self, ride_weights: dict) -> list | None:
         prob = pulp.LpProblem("Minimize the total amount of time waiting and riding rides", pulp.LpMinimize)
 
-        # Variables: defined the same as in the maximization problem
+        # Variable: defined the same as in the maximization problem
         rides = pulp.LpVariable.dicts("ride_time_step", [(ride, time_period) for ride in ride_weights.keys() for  time_period in range(1, self.time_steps+1)], lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
         
         # Objective function: minimize the amount of time spent waiting in line and riding on rides
         prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)), [rides[(ride, time_step)] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)])
+
+        # Constraint: the sum of all ride_(i, j) must be at least the min total rides preference set by the user
+        if self.min_total_rides != None:
+            prob += pulp.lpSum(rides[i, j] for i in ride_weights.keys() for j in range(1, self.time_steps+1)) >= self.min_total_rides
+        else:
+            return None
+        
+        prob.solve()
+
+        if pulp.LpStatus[prob.status] == "Optimal":
+            return ({(ride, time_step): pulp.value(rides[ride, time_step]) for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)})
+        else:
+            return None  

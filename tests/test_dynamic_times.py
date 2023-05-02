@@ -50,3 +50,10 @@ def test_maximize_with_min_distinct_rides_constraint():
     # Since we set the min distinct rides constraint to 3, then 'a', 'b', and 'c' must be rode at least once (over both time steps)
     #   - In this case, 'c' is cheaper in time step 2, and it is thus optimal to allocate space for one unit of 'c' from 2 units of 'b' in time step 2
     assert park.maximize_rides(ride_weights) == {('a', 1): 20.0, ('a', 2): 0.0, ('b', 1): 0.0, ('b', 2): 14.0, ('c', 1): 0.0, ('c', 2): 1.0}
+
+def test_minimize_no_preferences():
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time=None, min_total_rides=30)
+    park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
+    ride_weights = park.set_ride_weights()
+    # Since we set the min total rides constraint to 30, and since 'a' in time step 1 and 'b' in time step 2 are tied for the lowest weights, then it would be optimal to set ('a', 1) = 30 and everything else to 0, or to set ('b', 2) = 30 and everything else to 0, or to use any combination of non-zero values for ('a', 1) and ('b', 2) and set everything else to 0
+    assert park.minimize_time(ride_weights) == {('a', 1): 30.0, ('a', 2): 0.0, ('b', 1): 0.0, ('b', 2): 0.0, ('c', 1): 0.0, ('c', 2): 0.0}
