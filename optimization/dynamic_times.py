@@ -101,6 +101,10 @@ class OptimizeDynamic():
 
         # Variable: defined the same as in the maximization problem
         rides = pulp.LpVariable.dicts("ride_time_step", [(ride, time_period) for ride in ride_weights.keys() for  time_period in range(1, self.time_steps+1)], lowBound=0, upBound=self.max_ride_repeats,  cat=pulp.LpInteger)
+
+        # Variable: ride_rode_i will be an LpBinary that is used in the minimum distinct rides constraint (set by the user)
+        rides_rode = pulp.LpVariable.dicts("ride_rode",
+                                        ride_weights.keys(), cat=pulp.LpBinary)
         
         # Objective function: minimize the amount of time spent waiting in line and riding on rides
         prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)), [rides[(ride, time_step)] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)])
@@ -111,6 +115,29 @@ class OptimizeDynamic():
         else:
             return None
         
+        # Constraint: required and avoid rides; same implementation as maximization method
+        if self.require_and_avoid:
+                return None 
+        if self.required_rides != None:
+            for i in self.all_rides:
+                if i in self.required_rides:
+                    prob += pulp.lpSum(rides[i, j] for j in range(1, self.time_steps+1)) >= 1
+        if self.avoid_rides != None:
+            for i in self.all_rides:
+                if i in self.avoid_rides:
+                    prob += pulp.lpSum(rides[i, j] for j in range(1, self.time_steps+1)) == 0
+
+        # Constraint: max ride repeats; same implementation as maximization method
+        if self.max_ride_repeats != None:
+            for i in ride_weights.keys():
+                prob += pulp.lpSum(rides[i, time_step] for time_step in range(1, self.time_steps+1)) <= self.max_ride_repeats
+
+        # Constraint: min distinct rides; same implementation as maximization method
+        if self.min_distinct_rides != None:
+            for i in ride_weights.keys():
+                prob += pulp.lpSum(rides[i, time_step] for time_step in range(1, self.time_steps+1)) >= 1 * rides_rode[i]
+                prob += pulp.lpSum(rides_rode) >= self.min_distinct_rides
+
         prob.solve()
 
         if pulp.LpStatus[prob.status] == "Optimal":
