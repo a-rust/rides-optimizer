@@ -1,5 +1,6 @@
 import streamlit as st
 import demo_constant
+import demo_dynamic
 
 def define_problem():
     park = st.sidebar.selectbox(label="Park", options=("Demo", "Empty for now"))
@@ -15,6 +16,6 @@ def main():
     if time_assumption == "Constant":
         demo_constant.main()
     else:
-        return
+        demo_dynamic.main()
 
 main()
