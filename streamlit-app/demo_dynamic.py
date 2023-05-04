@@ -32,6 +32,7 @@ def main():
     rides_dynamic = demo_rides(granularity, ride_data_col1)
     required_constraints = random_required_constraints_data(rides_dynamic)
     user_preferences = random_optional_constraints_data(rides_dynamic, required_constraints)
+    optimize(granularity, rides_dynamic, user_preferences, result_col2)
 
 def demo_granularity(ride_data_col1):
 
@@ -55,7 +56,7 @@ def demo_rides(granularity: int, ride_data_col1):
 
     for i in range(1, granularity+1):
         rides_dynamic[f'WTP {i}'] = st.session_state.rand_times[i]
-        rides_dynamic[f'RTP {i}'] = st.session_state.rand_times[i]
+        rides_dynamic[f'RTP {i}'] = st.session_state.rand_times[i+1]
 
     if "rides_dynamic" not in st.session_state:
         st.session_state.rides_dynamic = rides_dynamic
@@ -131,3 +132,26 @@ def random_optional_constraints_data(rides_dynamic, required_constraints):
 
     user_preferences.convert_empty_data_types()
     return user_preferences
+
+def optimize(granularity, rides_dynamic, user_preferences, result_col2):
+    wait_times_lists = []
+    ride_times_lists = []
+    for i in range(1, 2*granularity+1):
+        if i % 2 == 0:
+            ride_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
+        else:
+            wait_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
+
+    wait_times = {}
+    ride_times = {}
+    for i in range(1, granularity+1):
+            wait_times.update({i: wait_times_lists[i-1]})
+            ride_times.update({i: ride_times_lists[i-1]})
+
+    optimize_data = dt.OptimizeDynamic(
+        all_rides=rides_dynamic.iloc[:, 0].tolist(),
+        time_steps=granularity,
+        wait_times=wait_times,
+        ride_times=ride_times,
+        user_preferences=user_preferences 
+        )
