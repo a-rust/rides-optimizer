@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from math import floor
 import random
 import helper
 import optimization.user_preferences as up
@@ -15,8 +16,8 @@ def main():
     empty_col1, btn_col2, empty_col3 = st.columns((1, 1, 1))
     randomize_data_btn = btn_col2.button("Randomize Data")
     if randomize_data_btn:
-        del st.session_state.rand_granularity
-        del st.session_state.rand_times
+        del st.session_state.rand_frequency
+        del st.session_state.rand_park_open_time
         del st.session_state.rides_dynamic
         if st.session_state.optimization_problem == "Maximize Rides":
             del st.session_state.rand_max_time_slider_dynamic
@@ -28,43 +29,48 @@ def main():
         del st.session_state.rand_max_ride_repeats_dynamic
             
     ride_data_col1, result_col2 = st.columns((1, 1))
-    granularity = demo_granularity(ride_data_col1)
-    rides_dynamic = demo_rides(granularity, ride_data_col1)
+    time_steps = granularity()
+    rides_dynamic = demo_rides(time_steps, ride_data_col1)
     required_constraints = random_required_constraints_data(rides_dynamic)
     user_preferences = random_optional_constraints_data(rides_dynamic, required_constraints)
-    optimize(granularity, rides_dynamic, user_preferences, result_col2)
+    optimize(time_steps, rides_dynamic, user_preferences, result_col2)
 
-def demo_granularity(ride_data_col1):
 
-    rand_granularity = random.randint(2, 5)
-    if "rand_granularity" not in st.session_state:
-        st.session_state.rand_granularity = rand_granularity
-    granularity = st.sidebar.slider("Granularity", min_value=2, max_value=5, value=st.session_state.rand_granularity, help="How often will the wait and/or ride times change?")
-    return granularity
+def granularity():
+    st.sidebar.markdown("<h2 style='text-align: center;'>Time Updates</h2", unsafe_allow_html=True, help="Control the time changes")
+    rand_frequency = 10*random.randint(2, 10)
+    if "rand_frequency" not in st.session_state:
+        st.session_state.rand_frequency = rand_frequency
+    frequency = st.sidebar.slider("Time Change Frequency (minutes)", min_value=20, max_value=100,  value=st.session_state.rand_frequency, key="frequency_slider", help="How often will the wait/rides times change?")
+    rand_park_open_time = 10*random.randint(20, 100)
+    if "rand_park_open_time" not in st.session_state:
+        st.session_state.rand_park_open_time = rand_park_open_time
+    park_open_mins = st.sidebar.slider("How long will the park open for (minutes)?", min_value=100, max_value=1000, value=st.session_state.rand_park_open_time)
+    time_steps = floor(park_open_mins / frequency) + 1
+    return time_steps
 
-def demo_rides(granularity: int, ride_data_col1):
+def demo_rides(time_steps, ride_data_col1):
 
     rides_col1 = [f'Ride_{i}' for i in range(1, 8)]
     rides_dynamic = pd.DataFrame({'Rides': rides_col1})
 
-    rand_times = []
-    for i in range(1, 2*granularity+1):
-        rand_times.append(np.random.randint(low=0, high=10, size=7))
-
-    if "rand_times" not in st.session_state:
-        st.session_state.rand_times = rand_times
-
-    for i in range(1, granularity+1):
-        rides_dynamic[f'WTP {i}'] = st.session_state.rand_times[i]
-        rides_dynamic[f'RTP {i}'] = st.session_state.rand_times[i+1]
+    rand_wait_times = []
+    rand_ride_times = []
+    for i in range(time_steps):
+        rand_wait_times.append(np.random.randint(low=0, high=10, size=7))
+        rand_ride_times.append(np.random.randint(low=0, high=10, size=7))
+    for i in range(1, time_steps):
+        rides_dynamic[f'Wait Times Period {i}'] = rand_wait_times[i]
+        rides_dynamic[f'Ride Times Period {i}'] = rand_ride_times[i]
 
     if "rides_dynamic" not in st.session_state:
         st.session_state.rides_dynamic = rides_dynamic
+    
+    ride_data_col1.markdown("<h2 style='text-align: center;'>Rides</h2", unsafe_allow_html=True)
 
-    ride_data_col1.markdown("<h2 style='text-align: center;'>Rides Over Time Periods</h2", unsafe_allow_html=True, help="WTP i, RTP i are the wait and ride times at period i, respectively")
-
-    experimental_rides_dynamic_df = ride_data_col1.experimental_data_editor(rides_dynamic, num_rows="dynamic")
+    experimental_rides_dynamic_df = ride_data_col1.experimental_data_editor(st.session_state.rides_dynamic, num_rows="dynamic")
     return experimental_rides_dynamic_df
+    
 
 def random_required_constraints_data(rides_dynamic):
     st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
@@ -133,10 +139,10 @@ def random_optional_constraints_data(rides_dynamic, required_constraints):
     user_preferences.convert_empty_data_types()
     return user_preferences
 
-def optimize(granularity, rides_dynamic, user_preferences, result_col2):
+def optimize(time_steps, rides_dynamic, user_preferences, result_col2):
     wait_times_lists = []
     ride_times_lists = []
-    for i in range(1, 2*granularity+1):
+    for i in range(1, 2*time_steps-1):
         if i % 2 == 0:
             ride_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
         else:
@@ -144,13 +150,13 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
 
     wait_times = {}
     ride_times = {}
-    for i in range(1, granularity+1):
-            wait_times.update({i: wait_times_lists[i-1]})
-            ride_times.update({i: ride_times_lists[i-1]})
+    for i in range(1, time_steps):
+        wait_times.update({i: wait_times_lists[i-1]})
+        ride_times.update({i: ride_times_lists[i-1]})
 
     optimize_data = dt.OptimizeDynamic(
         all_rides=rides_dynamic.iloc[:, 0].tolist(),
-        time_steps=granularity,
+        time_steps=time_steps,
         wait_times=wait_times,
         ride_times=ride_times,
         user_preferences=user_preferences 
