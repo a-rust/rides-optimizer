@@ -13,14 +13,14 @@ def test_set_ride_weights():
     assert park.set_ride_weights() == {'a': [5, 6], 'b': [9, 5], 'c': [13, 7]}
 
 def test_maximize_no_preferences():
-    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time=[100, 80], min_total_rides=None)
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time={1: 100, 2: 80}, min_total_rides=None)
     park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
     ride_weights = park.set_ride_weights()
     # Given a max time constraint of 100 in the first time step and a max time constraint of 80 in the second time step, it is optimal to ride 'a' 20 times in the first time step, and 'b' 16 times in the second time step. With additional preferences (like max ride repeats), the problem will become more interesting
     assert park.maximize_rides(ride_weights) == {('a', 1): 20.0, ('a', 2): 0.0, ('b', 1): 0.0, ('b', 2): 16.0, ('c', 1): 0.0, ('c', 2): 0.0}
 
 def test_maximize_with_required():
-    user_preferences = up.UserPreferences(required_rides=['c'], avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time=[100, 80], min_total_rides=None)
+    user_preferences = up.UserPreferences(required_rides=['c'], avoid_rides=None, min_distinct_rides=None, max_ride_repeats=None, max_time={1: 100, 2: 80}, min_total_rides=None)
     park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
     ride_weights = park.set_ride_weights()
     # Since we require ride 'c' at least once, then it must be the case that the sum of ride_(c, j) >= 1 for all time steps j
@@ -28,7 +28,7 @@ def test_maximize_with_required():
     assert park.maximize_rides(ride_weights) == {('a', 1): 20.0, ('a', 2): 0.0, ('b', 1): 0.0, ('b', 2): 14.0, ('c', 1): 0.0, ('c', 2): 1.0}
 
 def test_maximize_with_avoid():
-    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=['a'], min_distinct_rides=None, max_ride_repeats=None, max_time=[100, 80], min_total_rides=None)
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=['a'], min_distinct_rides=None, max_ride_repeats=None, max_time={1: 100, 2: 80}, min_total_rides=None)
     park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
     ride_weights = park.set_ride_weights()
     # Since we avoid ride 'a' all together, then it must be the case that the sum of ride_(a, j) = 0 for all time steps j
@@ -36,7 +36,7 @@ def test_maximize_with_avoid():
     assert park.maximize_rides(ride_weights) == {('a', 1): 0.0, ('a', 2): 0.0, ('b', 1): 11.0, ('b', 2): 16.0, ('c', 1): 0.0, ('c', 2): 0.0}
 
 def test_maximize_with_max_ride_repeat_constraint():
-    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=10, max_time=[100, 80], min_total_rides=None)
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=None, max_ride_repeats=10, max_time={1: 100, 2: 80}, min_total_rides=None)
     park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
     ride_weights = park.set_ride_weights()
     # Since we set a max ride repeat constraint of 10, then it must be the case that ('a', 1)+('a', 2) <= 10, ('b', 1)+('b', 2) <= 10, and ('c', 1)+('c', 2) <= 10
@@ -44,7 +44,7 @@ def test_maximize_with_max_ride_repeat_constraint():
     assert park.maximize_rides(ride_weights) == {('a', 1): 10.0, ('a', 2): 0.0, ('b', 1): 4.0, ('b', 2): 6.0, ('c', 1): 1.0, ('c', 2): 7.0}
 
 def test_maximize_with_min_distinct_rides_constraint():
-    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time=[100, 80], min_total_rides=None)
+    user_preferences = up.UserPreferences(required_rides=None, avoid_rides=None, min_distinct_rides=3, max_ride_repeats=None, max_time={1: 100, 2: 80}, min_total_rides=None)
     park = dt.OptimizeDynamic(all_rides=rides, time_steps=time_steps, wait_times=wait_times, ride_times=ride_times, user_preferences=user_preferences)
     ride_weights = park.set_ride_weights()
     # Since we set the min distinct rides constraint to 3, then 'a', 'b', and 'c' must be rode at least once (over both time steps)
