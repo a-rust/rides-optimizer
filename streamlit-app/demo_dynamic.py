@@ -32,7 +32,7 @@ def main():
     time_steps = granularity()
     rides_dynamic = demo_rides(time_steps, ride_data_col1)
     required_constraints = random_required_constraints_data(rides_dynamic)
-    user_preferences = random_optional_constraints_data(rides_dynamic, required_constraints)
+    user_preferences = random_optional_constraints_data(rides_dynamic, required_constraints, time_steps)
     optimize(time_steps, rides_dynamic, user_preferences, result_col2)
 
 
@@ -46,11 +46,11 @@ def granularity():
     if "rand_park_open_time" not in st.session_state:
         st.session_state.rand_park_open_time = rand_park_open_time
     park_open_mins = st.sidebar.slider("How long will the park open for (minutes)?", min_value=100, max_value=1000, value=st.session_state.rand_park_open_time)
-    time_steps = floor(park_open_mins / frequency) + 1
-    return time_steps
+    return [park_open_mins, frequency]
 
-def demo_rides(time_steps, ride_data_col1):
+def demo_rides(granularity, ride_data_col1):
 
+    time_steps = floor(granularity[0] / granularity[1]) + 1
     rides_col1 = [f'Ride_{i}' for i in range(1, 8)]
     rides_dynamic = pd.DataFrame({'Rides': rides_col1})
 
@@ -92,7 +92,7 @@ def random_required_constraints_data(rides_dynamic):
 
     return [max_time_slider, min_total_rides_slider]
 
-def random_optional_constraints_data(rides_dynamic, required_constraints):
+def random_optional_constraints_data(rides_dynamic, required_constraints, granularity):
     st.sidebar.markdown("<h2 style='text-align: center;'>Optional Constraints</h2", unsafe_allow_html=True, help="These constraints are optional, but make the optimization much more interesting")
     rand_required_rides_dynamic = random.choice(rides_dynamic.Rides)
     if "rand_required_rides_dynamic" not in st.session_state:
@@ -127,19 +127,25 @@ def random_optional_constraints_data(rides_dynamic, required_constraints):
     if st.session_state.optimization_problem == "Minimize Time":
         helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides_dynamic.Rides))
 
+    time_steps = floor(granularity[0] / granularity[1]) + 1
+    max_time_dict = {}
+    for i in range(1, time_steps):
+        max_time_dict.update({i: granularity[1]})
+
     user_preferences=up.UserPreferences(
         required_rides,
         avoid_rides,
         min_distinct_rides_slider,
         max_ride_repeats_slider,
-        {1: required_constraints[0]},
+        max_time_dict,
         required_constraints[1]
         ) 
 
     user_preferences.convert_empty_data_types()
     return user_preferences
 
-def optimize(time_steps, rides_dynamic, user_preferences, result_col2):
+def optimize(granularity, rides_dynamic, user_preferences, result_col2):
+    time_steps = floor(granularity[0] / granularity[1]) + 1
     wait_times_lists = []
     ride_times_lists = []
     for i in range(1, 2*time_steps-1):
@@ -156,8 +162,41 @@ def optimize(time_steps, rides_dynamic, user_preferences, result_col2):
 
     optimize_data = dt.OptimizeDynamic(
         all_rides=rides_dynamic.iloc[:, 0].tolist(),
-        time_steps=time_steps,
+        time_steps=time_steps-1,
         wait_times=wait_times,
         ride_times=ride_times,
         user_preferences=user_preferences 
         )
+
+    ride_weights = optimize_data.set_ride_weights()
+    
+    result_col2.markdown("<h2 style='text-align: center;'>Results</h2", unsafe_allow_html=True, help="Watch how changing the inputs to the optimization problem affects the results. If you get an error, try and spot where certain constraints contradict each other")
+    if st.session_state.optimization_problem == "Maximize Rides":
+        results = optimize_data.maximize_rides(ride_weights)
+    elif st.session_state.optimization_problem == "Minimize Time":
+        results = optimize_data.maximize_rides(ride_weights)
+        
+    
+    # Categorize results by each time period (i.e., group together the key tuples that have the same time period 1)
+    categorized_results = {}
+    for key, value in results.items():
+        index = key[1]
+        if index not in categorized_results:
+            categorized_results[index] = {}
+        categorized_results[index][key] = value
+
+    # Put the categorized data into a list of dicts; one for each time period
+    time_period_results = []
+    for time_step in range(1, time_steps):
+        rides = list(categorized_results[time_step].keys())
+        values = list(categorized_results[time_step].values())
+        # Isolate the rides from the time periods
+        isolated_rides = [ride[0] for ride in rides]
+        time_period_results.append(dict(zip(isolated_rides, values)))
+    st.write(time_period_results)
+    # Plot the optimal solution over each time period
+    for index, time_period in enumerate(time_period_results):
+        fig = plt.figure()
+        plt.bar(list(time_period.keys()), list(time_period.values()))
+        plt.title(f"Time Period {index+1}")
+        result_col2.pyplot(plt)
