@@ -38,11 +38,11 @@ def main():
 
 def granularity():
     st.sidebar.markdown("<h2 style='text-align: center;'>Time Updates</h2", unsafe_allow_html=True, help="Control the time changes")
-    rand_frequency = 10*random.randint(2, 10)
+    rand_frequency = random.randint(60, 100)
     if "rand_frequency" not in st.session_state:
         st.session_state.rand_frequency = rand_frequency
     frequency = st.sidebar.slider("Time Change Frequency (minutes)", min_value=20, max_value=100,  value=st.session_state.rand_frequency, key="frequency_slider", help="How often will the wait/rides times change?")
-    rand_park_open_time = 10*random.randint(20, 100)
+    rand_park_open_time = random.randint(200, 400)
     if "rand_park_open_time" not in st.session_state:
         st.session_state.rand_park_open_time = rand_park_open_time
     park_open_mins = st.sidebar.slider("How long will the park open for (minutes)?", min_value=100, max_value=1000, value=st.session_state.rand_park_open_time)
@@ -83,7 +83,7 @@ def random_required_constraints_data(rides_dynamic):
     else:
         max_time_slider = None
     if st.session_state.optimization_problem == "Minimize Time":
-        rand_min_total_rides_slider_dynamic = random.randint(0, 10*len(rides_dynamic.Rides))
+        rand_min_total_rides_slider_dynamic = random.randint(0, 5*len(rides_dynamic.Rides))
         if "rand_min_total_rides_slider_dynamic" not in st.session_state:
             st.session_state.rand_min_total_rides_slider_dynamic = rand_min_total_rides_slider_dynamic
         min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides_dynamic.Rides), value=st.session_state.rand_min_total_rides_slider_dynamic, help="What is the minimum total number of rides you'd like to go on?")
@@ -193,7 +193,7 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
         # Isolate the rides from the time periods
         isolated_rides = [ride[0] for ride in rides]
         time_period_results.append(dict(zip(isolated_rides, values)))
-    st.write(time_period_results)
+
     # Plot the optimal solution over each time period
     for index, time_period in enumerate(time_period_results):
         fig = plt.figure()
