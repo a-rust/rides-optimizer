@@ -17,7 +17,7 @@ def main():
     randomize_data_btn = btn_col2.button("Randomize Data")
     if randomize_data_btn:
         del st.session_state.rand_frequency
-        del st.session_state.rand_park_open_time
+        del st.session_state.rand_time_periods
         del st.session_state.rides_dynamic
         if st.session_state.optimization_problem == "Maximize Rides":
             del st.session_state.rand_max_time_slider_dynamic
@@ -42,24 +42,23 @@ def granularity():
     if "rand_frequency" not in st.session_state:
         st.session_state.rand_frequency = rand_frequency
     frequency = st.sidebar.slider("Time Change Frequency (minutes)", min_value=20, max_value=100,  value=st.session_state.rand_frequency, key="frequency_slider", help="How often will the wait/rides times change?")
-    rand_park_open_time = random.randint(200, 400)
-    if "rand_park_open_time" not in st.session_state:
-        st.session_state.rand_park_open_time = rand_park_open_time
-    park_open_mins = st.sidebar.slider("How long will the park open for (minutes)?", min_value=100, max_value=1000, value=st.session_state.rand_park_open_time)
-    return [park_open_mins, frequency]
+    rand_time_periods = random.randint(2, 10)
+    if "rand_time_periods" not in st.session_state:
+        st.session_state.rand_time_periods = rand_time_periods
+    time_periods = st.sidebar.slider("How many time changes will there be?", min_value=2, max_value=20, value=st.session_state.rand_time_periods)
+    return [time_periods, frequency]
 
 def demo_rides(granularity, ride_data_col1):
 
-    time_steps = floor(granularity[0] / granularity[1]) + 1
     rides_col1 = [f'Ride_{i}' for i in range(1, 8)]
     rides_dynamic = pd.DataFrame({'Rides': rides_col1})
 
     rand_wait_times = []
     rand_ride_times = []
-    for i in range(time_steps):
+    for i in range(granularity[0]+1):
         rand_wait_times.append(np.random.randint(low=0, high=10, size=7))
         rand_ride_times.append(np.random.randint(low=0, high=10, size=7))
-    for i in range(1, time_steps):
+    for i in range(1, granularity[0]+1):
         rides_dynamic[f'Wait Times Period {i}'] = rand_wait_times[i]
         rides_dynamic[f'Ride Times Period {i}'] = rand_ride_times[i]
 
@@ -127,9 +126,8 @@ def random_optional_constraints_data(rides_dynamic, required_constraints, granul
     if st.session_state.optimization_problem == "Minimize Time":
         helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides_dynamic.Rides))
 
-    time_steps = floor(granularity[0] / granularity[1]) + 1
     max_time_dict = {}
-    for i in range(1, time_steps):
+    for i in range(1, granularity[0]+1):
         max_time_dict.update({i: granularity[1]})
 
     user_preferences=up.UserPreferences(
@@ -145,10 +143,9 @@ def random_optional_constraints_data(rides_dynamic, required_constraints, granul
     return user_preferences
 
 def optimize(granularity, rides_dynamic, user_preferences, result_col2):
-    time_steps = floor(granularity[0] / granularity[1]) + 1
     wait_times_lists = []
     ride_times_lists = []
-    for i in range(1, 2*time_steps-1):
+    for i in range(1, 2*granularity[0]+1):
         if i % 2 == 0:
             ride_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
         else:
@@ -156,13 +153,13 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
 
     wait_times = {}
     ride_times = {}
-    for i in range(1, time_steps):
+    for i in range(1, granularity[0]+1):
         wait_times.update({i: wait_times_lists[i-1]})
         ride_times.update({i: ride_times_lists[i-1]})
 
     optimize_data = dt.OptimizeDynamic(
         all_rides=rides_dynamic.iloc[:, 0].tolist(),
-        time_steps=time_steps-1,
+        time_steps=granularity[0],
         wait_times=wait_times,
         ride_times=ride_times,
         user_preferences=user_preferences 
@@ -187,7 +184,7 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
 
     # Put the categorized data into a list of dicts; one for each time period
     time_period_results = []
-    for time_step in range(1, time_steps):
+    for time_step in range(1, granularity[0]+1):
         rides = list(categorized_results[time_step].keys())
         values = list(categorized_results[time_step].values())
         # Isolate the rides from the time periods
