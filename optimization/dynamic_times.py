@@ -7,9 +7,10 @@ Also assumes that these changing times are known beforehand
 '''
 
 class OptimizeDynamic():
-    def __init__(self, all_rides: list, time_steps: int, wait_times: dict, ride_times: dict, user_preferences: up.UserPreferences) -> None:
+    def __init__(self, all_rides: list, time_steps: int, frequency: int, wait_times: dict, ride_times: dict, user_preferences: up.UserPreferences) -> None:
         self.all_rides = all_rides
         self.time_steps = time_steps
+        self.frequency = frequency
         self.wait_times = wait_times
         self.ride_times = ride_times
         self.required_rides = user_preferences.required_rides
@@ -66,9 +67,11 @@ class OptimizeDynamic():
         prob += pulp.lpSum(rides[(ride, time_step)] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1))
 
         # Constraint: the sum of the dot product of the rides and their corresponding weights in each time step must be at most the user's max time constraint
+        for time_step in range(1, self.time_steps+1):
+            prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys()), [rides[(ride, time_step)] for ride in ride_weights.keys()]) <= self.frequency
+
         if self.max_time != None:
-            for time_step in range(1, self.time_steps+1):
-                prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys()), [rides[(ride, time_step)] for ride in ride_weights.keys()]) <= self.max_time[time_step]
+            prob += pulp.lpDot(list(ride_weights[ride][time_step-1] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)), [rides[(ride, time_step)] for ride in ride_weights.keys() for time_step in range(1, self.time_steps+1)]) <= self.max_time
 
         # Constraint: ride_(i, j) >= 1 for at least one time step j if the user wants to ride ride_i at least once
         # Constraint: ride_(i, j) = 0 for all time steps j if the user wants to avoid ride_i all together
