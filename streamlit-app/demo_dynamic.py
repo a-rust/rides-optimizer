@@ -42,10 +42,10 @@ def granularity():
     if "rand_frequency" not in st.session_state:
         st.session_state.rand_frequency = rand_frequency
     frequency = st.sidebar.slider("Time Change Frequency (minutes)", min_value=20, max_value=100,  value=st.session_state.rand_frequency, key="frequency_slider", help="How often will the wait/rides times change?")
-    rand_time_periods = random.randint(2, 10)
+    rand_time_periods = random.randint(2, 5)
     if "rand_time_periods" not in st.session_state:
         st.session_state.rand_time_periods = rand_time_periods
-    time_periods = st.sidebar.slider("How many time changes will there be?", min_value=2, max_value=20, value=st.session_state.rand_time_periods)
+    time_periods = st.sidebar.slider("How many time periods will there be?", min_value=2, max_value=20, value=st.session_state.rand_time_periods)
     return [time_periods, frequency]
 
 def demo_rides(granularity, ride_data_col1):
@@ -82,7 +82,7 @@ def random_required_constraints_data(rides_dynamic):
     else:
         max_time_slider = None
     if st.session_state.optimization_problem == "Minimize Time":
-        rand_min_total_rides_slider_dynamic = random.randint(0, 5*len(rides_dynamic.Rides))
+        rand_min_total_rides_slider_dynamic = random.randint(10, 5*len(rides_dynamic.Rides))
         if "rand_min_total_rides_slider_dynamic" not in st.session_state:
             st.session_state.rand_min_total_rides_slider_dynamic = rand_min_total_rides_slider_dynamic
         min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides_dynamic.Rides), value=st.session_state.rand_min_total_rides_slider_dynamic, help="What is the minimum total number of rides you'd like to go on?")
@@ -126,16 +126,12 @@ def random_optional_constraints_data(rides_dynamic, required_constraints, granul
     if st.session_state.optimization_problem == "Minimize Time":
         helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides_dynamic.Rides))
 
-    max_time_dict = {}
-    for i in range(1, granularity[0]+1):
-        max_time_dict.update({i: granularity[1]})
-
     user_preferences=up.UserPreferences(
         required_rides,
         avoid_rides,
         min_distinct_rides_slider,
         max_ride_repeats_slider,
-        max_time_dict,
+        required_constraints[0],
         required_constraints[1]
         ) 
 
@@ -160,6 +156,7 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
     optimize_data = dt.OptimizeDynamic(
         all_rides=rides_dynamic.iloc[:, 0].tolist(),
         time_steps=granularity[0],
+        frequency=granularity[1],
         wait_times=wait_times,
         ride_times=ride_times,
         user_preferences=user_preferences 
@@ -171,8 +168,7 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
     if st.session_state.optimization_problem == "Maximize Rides":
         results = optimize_data.maximize_rides(ride_weights)
     elif st.session_state.optimization_problem == "Minimize Time":
-        results = optimize_data.maximize_rides(ride_weights)
-        
+        results = optimize_data.minimize_time(ride_weights)
     
     # Categorize results by each time period (i.e., group together the key tuples that have the same time period 1)
     categorized_results = {}
