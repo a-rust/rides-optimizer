@@ -40,6 +40,9 @@ def main():
     user_preferences = random_optional_constraints_data(rides_dynamic, required_constraints, time_steps)
     optimize(time_steps, rides_dynamic, user_preferences, result_col2)
 
+def update_time_periods():
+    if "rides_dynamic" in st.session_state:
+        del st.session_state.rides_dynamic
 
 def granularity():
     st.sidebar.markdown("<h2 style='text-align: center;'>Time Updates</h2", unsafe_allow_html=True, help="Control the time changes")
@@ -50,7 +53,7 @@ def granularity():
     rand_time_periods = random.randint(2, 5)
     if "rand_time_periods" not in st.session_state:
         st.session_state.rand_time_periods = rand_time_periods
-    time_periods = st.sidebar.slider("How many time periods will there be?", min_value=2, max_value=20, value=st.session_state.rand_time_periods)
+    time_periods = st.sidebar.slider("How many time periods will there be?", min_value=2, max_value=20, value=st.session_state.rand_time_periods, on_change=update_time_periods())
     return [time_periods, frequency]
 
 def demo_rides(granularity, ride_data_col1):
