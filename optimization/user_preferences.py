@@ -1,3 +1,4 @@
+import typing
 '''
 This class will be associated with user preferences, which will ultimately define the constraints of the mixed integer programming problems.
 For now, we only consider the following user preferences (will update later):
@@ -11,8 +12,9 @@ For now, we only consider the following user preferences (will update later):
     - Only applies to the minimization problem
 '''
 
+
 class UserPreferences():
-    def __init__(self, required_rides: list | None, avoid_rides: list | None, min_distinct_rides: list | None, max_ride_repeats: list | None, max_time: int | None, min_total_rides: int | None):
+    def __init__(self, required_rides: typing.Optional[list] = None, avoid_rides: typing.Optional[list] = None, min_distinct_rides: typing.Optional[list] = None, max_ride_repeats: typing.Optional[list] = None, max_time: typing.Optional[int] = None, min_total_rides: typing.Optional[int] = None):
         self.required_rides = required_rides
         self.avoid_rides = avoid_rides
         self.min_distinct_rides = min_distinct_rides
@@ -37,4 +39,4 @@ class UserPreferences():
             if len(set(self.required_rides).intersection(set(self.avoid_rides))) > 0:
                 return True
             else:
-                return False 
+                return False
