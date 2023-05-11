@@ -48,7 +48,7 @@ class OptimizeConstant():
     # --------------------
 
     # Maximizes the total number of rides to go on, given user constraints
-    def maximize_rides(self, ride_weights: dict) -> list | None:
+    def maximize_rides(self, ride_weights: dict):
 
         # Deal with the possibility of a preference contradiction before moving forward
         if self.set_contradiction_value():
@@ -113,7 +113,7 @@ class OptimizeConstant():
     # --------------------
 
     # Minimizes the total amount of time waiting and riding rides, given user constraints
-    def minimize_time(self, ride_weights: dict) -> list | None:
+    def minimize_time(self, ride_weights: dict):
 
         # Deal with the possibility of a preference contradiction before moving forward; same implementation as maximization method
         if self.set_contradiction_value():

@@ -52,7 +52,7 @@ class OptimizeDynamic():
     # --------------------
 
     # Maximizes the total number of rides to go on over all time steps
-    def maximize_rides(self, ride_weights: dict) -> list | None:
+    def maximize_rides(self, ride_weights: dict):
 
         # Deal with the possibility of a preference contradiction before moving forward
         if self.set_contradiction_value():
@@ -120,7 +120,7 @@ class OptimizeDynamic():
     # --------------------
 
     # Minimizes the amount of time spent waiting and riding rides over all time steps
-    def minimize_time(self, ride_weights: dict) -> list | None:
+    def minimize_time(self, ride_weights: dict):
         prob = pulp.LpProblem("Minimize the total amount of time waiting and riding rides", pulp.LpMinimize)
 
         # Deal with the possibility of a preference contradiction before moving forward
