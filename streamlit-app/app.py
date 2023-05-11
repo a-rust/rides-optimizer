@@ -15,7 +15,7 @@ def main():
     time_assumption = define_problem()
     if time_assumption == "Constant":
         demo_constant.main()
-    else:
+    elif time_assumption == "Dynamic":
         demo_dynamic.main()
 
 main()
