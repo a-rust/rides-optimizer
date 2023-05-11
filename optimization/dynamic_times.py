@@ -1,5 +1,9 @@
 import pulp
-import user_preferences as up
+import sys
+import os
+path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(path)
+from optimization import user_preferences as up
 
 ''' 
 This file considers the optimization problems assuming dynamic wait and ride times.

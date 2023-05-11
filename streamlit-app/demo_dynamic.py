@@ -4,9 +4,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from math import floor
 import random
+
+import sys
+import os
+path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(path)
+from optimization import user_preferences as up
+from optimization import dynamic_times as dt
 import helper
-import optimization.user_preferences as up
-import optimization.dynamic_times as dt
 
 def main():
     optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent at the park?")

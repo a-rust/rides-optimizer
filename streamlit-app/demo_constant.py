@@ -4,9 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 
+import sys
+import os
+path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(path)
+from optimization import user_preferences as up
+from optimization import constant_times as ct
 import helper
-import optimization.user_preferences as up
-import optimization.constant_times as ct
 
 
 def main():
