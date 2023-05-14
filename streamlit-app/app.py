@@ -2,6 +2,7 @@ import streamlit as st
 import demo_constant
 import demo_dynamic
 import park_data
+import parks
 
 
 def define_park():
@@ -11,7 +12,7 @@ def define_park():
     elif park == "Disneyland Resort Magic Kingdom":
         st.markdown("<h1 style='text-align: center;'>Disneyland Resort Magic Kingdom</h1", unsafe_allow_html=True)
     elif park == "Disneyland Resort California Adventure":
-        st.markdown("<h1 style='text-align: center;'>Disneyland Resort California Adventure</h1")
+        st.markdown("<h1 style='text-align: center;'>Disneyland Resort California Adventure</h1", unsafe_allow_html=True)
     elif park == "Universal Studios":
         st.markdown("<h1 style='text-align: center;'>Universal Studios</h1", unsafe_allow_html=True)
     return park
@@ -28,5 +29,15 @@ def main():
             demo_constant.main()
         elif time_assumption == "Dynamic":
             demo_dynamic.main()
-
+    elif park == "Disneyland Resort Magic Kingdom":
+        disney_kingdom = park_data.ParkData("https://api.themeparks.wiki/preview/parks/DisneylandResortMagicKingdom/waittime")
+        p = parks.OptimizePark(park, disney_kingdom.get_all_rides(), disney_kingdom.filter_for_active_rides(), time_assumption, "none")
+    elif park == "Disneyland Resort California Adventure":
+        california_adventure = park_data.ParkData("https://api.themeparks.wiki/preview/parks/DisneylandResortCaliforniaAdventure/waittime")
+        p = parks.OptimizePark(park, california_adventure.get_all_rides(), california_adventure.filter_for_active_rides(), time_assumption, "none")
+    
+    elif park == "Universal Studios":
+        universal_studios = park_data.ParkData("https://api.themeparks.wiki/preview/parks/UniversalStudios/waittime")
+        p = parks.OptimizePark(park, universal_studios.get_all_rides(), universal_studios.filter_for_active_rides(), time_assumption, "none")
+        
 main()
