@@ -1,9 +1,16 @@
 import streamlit as st
+import requests
+
 import demo_constant
 import demo_dynamic
 import park_data
 import parks
 
+# Caching the data for 3600 seconds to avoid spamming api requests
+@st.cache_data(ttl=3600)
+def api_request(url):
+    url_request = requests.get(url)
+    return url_request.json()
 
 def define_park():
     park = st.sidebar.selectbox(label="Park", options=("Demo", "Disneyland Resort Magic Kingdom", "Disneyland Resort California Adventure", "Universal Studios"))
@@ -30,16 +37,19 @@ def main():
         elif time_assumption == "Dynamic":
             demo_dynamic.main()
     elif park == "Disneyland Resort Magic Kingdom":
-        disney_kingdom = park_data.ParkData("https://api.themeparks.wiki/preview/parks/DisneylandResortMagicKingdom/waittime")
+        rides = api_request("https://api.themeparks.wiki/preview/parks/DisneylandResortMagicKingdom/waittime")
+        disney_kingdom = park_data.ParkData(rides)
         p = parks.OptimizePark(park, disney_kingdom.get_all_rides(), disney_kingdom.filter_for_active_rides(), time_assumption)
         p.main()
     elif park == "Disneyland Resort California Adventure":
-        california_adventure = park_data.ParkData("https://api.themeparks.wiki/preview/parks/DisneylandResortCaliforniaAdventure/waittime")
+        rides = api_request("https://api.themeparks.wiki/preview/parks/DisneylandResortCaliforniaAdventure/waittime")
+        california_adventure = park_data.ParkData(rides)
         p = parks.OptimizePark(park, california_adventure.get_all_rides(), california_adventure.filter_for_active_rides(), time_assumption)
         p.main()
     
     elif park == "Universal Studios":
-        universal_studios = park_data.ParkData("https://api.themeparks.wiki/preview/parks/UniversalStudios/waittime")
+        rides = api_request("https://api.themeparks.wiki/preview/parks/UniversalStudios/waittime")
+        universal_studios = park_data.ParkData(rides)
         p = parks.OptimizePark(park, universal_studios.get_all_rides(), universal_studios.filter_for_active_rides(), time_assumption)
         p.main()
         
