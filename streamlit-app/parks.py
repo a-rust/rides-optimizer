@@ -3,9 +3,14 @@ import pandas as pd
 import random
 import sys
 import os
+import typing
+
 path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(path)
 import park_data
+from optimization import user_preferences as up
+from optimization import constant_times as ct
+import helper
 
 
 class OptimizePark():
@@ -19,9 +24,13 @@ class OptimizePark():
         optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent at the park?")
         if optimization_problem not in st.session_state:
             st.session_state.optimization_problem = optimization_problem
-        time_periods = self.granularity()
-        rides = self.park_rides(time_periods)
+        if self.time_assumption == "Constant":
+            rides = self.park_rides(None)
+        elif self.time_assumption == "Dynamic":
+            time_periods = self.granularity()
+            rides = self.park_rides(time_periods)
         required_constraints = self.required_constraints(rides)
+        optional_constraints = self.optional_constraints(rides, required_constraints)
 
     def granularity(self):
         st.sidebar.markdown("<h2 style='text-align: center;'>Time Updates</h2", unsafe_allow_html=True, help="Control the time changes")
@@ -33,7 +42,7 @@ class OptimizePark():
         time_periods = st.sidebar.slider("How many time periods will there be?", min_value=2, max_value=20, value=st.session_state.rand_time_periods)
         return [time_periods, frequency]
 
-    def park_rides(self, granularity):
+    def park_rides(self, granularity: typing.Optional[list] = None):
         if self.time_assumption == "Constant":
             park_rides = pd.DataFrame({"Rides": list(self.active_rides.keys()), "Wait Times": list(self.active_rides.values())})
 
@@ -59,3 +68,27 @@ class OptimizePark():
             min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides.Rides), value=rand_min_total_rides_slider, help="What is the minimum total number of rides you'd like to go on?")
             max_time_slider = None
         return [max_time_slider, min_total_rides_slider]
+
+    def optional_constraints(self, rides,  required_constraints):
+        st.sidebar.markdown("<h2 style='text-align: center;'>Optional Constraints</h2", unsafe_allow_html=True, help="These constraints are optional, but make the optimization much more interesting")
+        required_rides = st.sidebar.multiselect("Required Rides", options=[i for i in rides.Rides], help="Which rides would you like to go on at least once?")
+
+        avoid_rides = st.sidebar.multiselect("Avoid Rides", options=[i for i in rides.Rides], help="Which rides would you like to avoid entirely?")
+
+        helper.require_avoid_contradiction(required_rides, avoid_rides)
+
+        min_distinct_rides_slider = st.sidebar.slider("Minimum Distinct Rides", min_value=1, max_value=len(rides.Rides), help="What is the minimum number of distinct rides you'd like to go on?")
+
+        max_ride_repeats_slider = st.sidebar.slider("Maximum Ride Repeats", min_value=1, max_value=50, value=5, help="What is the maximum number of times you'd like to ride any single ride?")
+
+        if st.session_state.optimization_problem == "Minimize Time":
+            helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides.Rides))
+        
+        user_preferences=up.UserPreferences(
+            required_rides,
+            avoid_rides,
+            min_distinct_rides_slider,
+            max_ride_repeats_slider,
+            required_constraints[0],
+            required_constraints[1]
+            )
