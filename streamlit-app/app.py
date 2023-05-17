@@ -31,16 +31,16 @@ def main():
             demo_dynamic.main()
     elif park == "Disneyland Resort Magic Kingdom":
         disney_kingdom = park_data.ParkData("https://api.themeparks.wiki/preview/parks/DisneylandResortMagicKingdom/waittime")
-        p = parks.OptimizePark(park, disney_kingdom.get_all_rides(), disney_kingdom.filter_for_active_rides(), time_assumption, "none")
+        p = parks.OptimizePark(park, disney_kingdom.get_all_rides(), disney_kingdom.filter_for_active_rides(), time_assumption)
         p.main()
     elif park == "Disneyland Resort California Adventure":
         california_adventure = park_data.ParkData("https://api.themeparks.wiki/preview/parks/DisneylandResortCaliforniaAdventure/waittime")
-        p = parks.OptimizePark(park, california_adventure.get_all_rides(), california_adventure.filter_for_active_rides(), time_assumption, "none")
+        p = parks.OptimizePark(park, california_adventure.get_all_rides(), california_adventure.filter_for_active_rides(), time_assumption)
         p.main()
     
     elif park == "Universal Studios":
         universal_studios = park_data.ParkData("https://api.themeparks.wiki/preview/parks/UniversalStudios/waittime")
-        p = parks.OptimizePark(park, universal_studios.get_all_rides(), universal_studios.filter_for_active_rides(), time_assumption, "none")
+        p = parks.OptimizePark(park, universal_studios.get_all_rides(), universal_studios.filter_for_active_rides(), time_assumption)
         p.main()
         
 main()
