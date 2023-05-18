@@ -10,10 +10,10 @@ This file considers the optimization problems assuming constant wait and ride ti
 '''
 
 class OptimizeConstant():
-    def __init__(self, all_rides: list, wait_times: list, ride_times: list, user_preferences: up.UserPreferences) -> None:
+    def __init__(self, all_rides: list, wait_times: list, user_preferences: up.UserPreferences) -> None:
         self.all_rides = all_rides
         self.wait_times = wait_times
-        self.ride_times = ride_times
+        # self.ride_times = ride_times
         self.required_rides = user_preferences.required_rides
         self.avoid_rides = user_preferences.avoid_rides
         self.require_and_avoid = user_preferences.require_and_avoid_rides()
@@ -28,7 +28,7 @@ class OptimizeConstant():
 
     # Returns a dict where the keys are ride names, and the values are total weights (i.e., wait times plus ride times)
     def set_ride_weights(self) -> dict:
-        return {self.all_rides[i]: self.wait_times[i] + self.ride_times[i] for i in range(len(self.all_rides))}
+        return {self.all_rides[i]: self.wait_times[i] for i in range(len(self.all_rides))}
     
     # Returns a bool as to whether the a combination of user preferences leads to a contradiction 
     def set_contradiction_value(self) -> bool:

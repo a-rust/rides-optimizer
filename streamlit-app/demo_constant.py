@@ -41,9 +41,8 @@ def main():
 def demo_random_rides_data(ride_data_col1):
     rides_col1 = [f'Ride_{i}' for i in range(1, 8)]
     rides_col2 = np.random.randint(low=0, high=10, size=7)
-    rides_col3 = np.random.randint(low=0, high=10, size=7)
 
-    rides = pd.DataFrame({"Rides": rides_col1, "Wait Times": rides_col2, "Ride Times": rides_col3})
+    rides = pd.DataFrame({"Rides": rides_col1, "Wait Times": rides_col2})
 
     if "rides" not in st.session_state:
         st.session_state.rides = rides
@@ -125,7 +124,6 @@ def optimize(rides, user_preferences, result_col2):
     optimize_data = ct.OptimizeConstant(
         all_rides=rides.iloc[:, 0].tolist(),
         wait_times=rides.iloc[:, 1].tolist(),
-        ride_times=rides.iloc[:, 2].tolist(),
         user_preferences=user_preferences 
         )
 

@@ -62,13 +62,10 @@ def demo_rides(granularity, ride_data_col1):
     rides_dynamic = pd.DataFrame({'Rides': rides_col1})
 
     rand_wait_times = []
-    rand_ride_times = []
     for i in range(granularity[0]+1):
         rand_wait_times.append(np.random.randint(low=0, high=10, size=7))
-        rand_ride_times.append(np.random.randint(low=0, high=10, size=7))
     for i in range(1, granularity[0]+1):
         rides_dynamic[f'Wait Times Period {i}'] = rand_wait_times[i]
-        rides_dynamic[f'Ride Times Period {i}'] = rand_ride_times[i]
 
     if "rides_dynamic" not in st.session_state:
         st.session_state.rides_dynamic = rides_dynamic
@@ -148,25 +145,18 @@ def random_optional_constraints_data(rides_dynamic, required_constraints, granul
 
 def optimize(granularity, rides_dynamic, user_preferences, result_col2):
     wait_times_lists = []
-    ride_times_lists = []
-    for i in range(1, 2*granularity[0]+1):
-        if i % 2 == 0:
-            ride_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
-        else:
-            wait_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
+    for i in range(1, granularity[0]+1):
+        wait_times_lists.append(rides_dynamic.iloc[:, i].tolist(),)
 
     wait_times = {}
-    ride_times = {}
     for i in range(1, granularity[0]+1):
         wait_times.update({i: wait_times_lists[i-1]})
-        ride_times.update({i: ride_times_lists[i-1]})
 
     optimize_data = dt.OptimizeDynamic(
         all_rides=rides_dynamic.iloc[:, 0].tolist(),
         time_steps=granularity[0],
         frequency=granularity[1],
         wait_times=wait_times,
-        ride_times=ride_times,
         user_preferences=user_preferences 
         )
 
