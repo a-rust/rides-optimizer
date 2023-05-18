@@ -39,18 +39,18 @@ def main():
     elif park == "Disneyland Resort Magic Kingdom":
         rides = api_request("https://api.themeparks.wiki/preview/parks/DisneylandResortMagicKingdom/waittime")
         disney_kingdom = park_data.ParkData(rides)
-        p = parks.OptimizePark(park, disney_kingdom.get_all_rides(), disney_kingdom.filter_for_active_rides(), time_assumption)
+        p = parks.OptimizePark(park, disney_kingdom.filter_for_active_rides(), time_assumption)
         p.main()
     elif park == "Disneyland Resort California Adventure":
         rides = api_request("https://api.themeparks.wiki/preview/parks/DisneylandResortCaliforniaAdventure/waittime")
         california_adventure = park_data.ParkData(rides)
-        p = parks.OptimizePark(park, california_adventure.get_all_rides(), california_adventure.filter_for_active_rides(), time_assumption)
+        p = parks.OptimizePark(park, california_adventure.filter_for_active_rides(), time_assumption)
         p.main()
     
     elif park == "Universal Studios":
         rides = api_request("https://api.themeparks.wiki/preview/parks/UniversalStudios/waittime")
         universal_studios = park_data.ParkData(rides)
-        p = parks.OptimizePark(park, universal_studios.get_all_rides(), universal_studios.filter_for_active_rides(), time_assumption)
+        p = parks.OptimizePark(park, universal_studios.filter_for_active_rides(), time_assumption)
         p.main()
         
 main()
