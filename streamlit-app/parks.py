@@ -22,7 +22,7 @@ class OptimizePark():
 
     def main(self):
         global time_periods
-        optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent at the park?")
+        optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent waiting in line?")
         if optimization_problem not in st.session_state:
             st.session_state.optimization_problem = optimization_problem
         col1, col2 = st.columns((1, 1))
@@ -66,7 +66,7 @@ class OptimizePark():
     def required_constraints(self, rides):
         st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
         if st.session_state.optimization_problem == "Maximize Rides":
-            max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, help="What is the maximum total amount of time you'd like to spend waiting and riding rides?")
+            max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, help="What is the maximum total amount of time you'd like to spend waiting for rides?")
             min_total_rides_slider = None
         elif st.session_state.optimization_problem == "Minimize Time":
             min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides.Rides), help="What is the minimum total number of rides you'd like to go on?")

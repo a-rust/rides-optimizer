@@ -14,7 +14,7 @@ from optimization import dynamic_times as dt
 import helper
 
 def main():
-    optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent at the park?")
+    optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent waiting in line?")
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
     
@@ -83,7 +83,7 @@ def random_required_constraints_data(rides_dynamic):
         rand_max_time_slider_dynamic = random.randint(10*len(rides_dynamic.Rides), 300)
         if "rand_max_time_slider_dynamic" not in st.session_state:
             st.session_state.rand_max_time_slider_dynamic = rand_max_time_slider_dynamic
-        max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, value=st.session_state.rand_max_time_slider_dynamic, help="What is the maximum total amount of time you'd like to spend waiting and riding rides?")
+        max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, value=st.session_state.rand_max_time_slider_dynamic, help="What is the maximum total amount of time you'd like to spend waiting for rides?")
     else:
         max_time_slider = None
     if st.session_state.optimization_problem == "Minimize Time":
