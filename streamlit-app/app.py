@@ -5,6 +5,7 @@ import demo_constant
 import demo_dynamic
 import park_data
 import parks
+import instructions
 
 # Caching the data for 3600 seconds to avoid spamming api requests
 @st.cache_data(ttl=3600)
@@ -29,6 +30,7 @@ def define_time_assumption():
     return time_assumption
 
 def main():
+    instructions.guide()
     park = define_park()
     time_assumption = define_time_assumption()
     if park == "Demo":
