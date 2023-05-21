@@ -49,16 +49,28 @@ class OptimizePark():
         return [time_periods, frequency]
 
     def park_rides(self, col1, granularity: typing.Optional[list] = None):
+        col1.markdown("<h2 style='text-align: center;'>Active Rides</h2", unsafe_allow_html=True, help="Feel free to add, delete, or edit the rides data")
+        zero_wait_time_rides = col1.checkbox("Discard rides with a wait time of zero?", value=True, help='If a ride with a wait time of 0 is considered, then it will automatically be a part of the optimal solution, as it holds no weight, and is essentially "free" to include. To make things more interesting, try discarding such rides.')
+
+        non_zero_rides = {}
+        for key, value in self.active_rides.items():
+            if value != 0:
+                non_zero_rides.update({key: value})
+
         if self.time_assumption == "Constant":
-            park_rides = pd.DataFrame({"Rides": list(self.active_rides.keys()), "Wait Times": list(self.active_rides.values())})
+            if zero_wait_time_rides:
+                park_rides = pd.DataFrame({"Rides": list(non_zero_rides.keys()), "Wait Times": list(non_zero_rides.values())})
+            else:
+                park_rides = pd.DataFrame({"Rides": list(self.active_rides.keys()), "Wait Times": list(self.active_rides.values())})
 
         elif self.time_assumption == "Dynamic":
-            park_rides = pd.DataFrame({"Rides": list(self.active_rides.keys()), "Wait Times Period 1": list(self.active_rides.values())})
+            if zero_wait_time_rides:
+                park_rides = pd.DataFrame({"Rides": list(non_zero_rides.keys()), "Wait Times Period 1": list(non_zero_rides.values())})
+            else:
+                park_rides = pd.DataFrame({"Rides": list(self.active_rides.keys()), "Wait Times Period 1": list(self.active_rides.values())})
             for i in range(1, granularity[0]):
                 park_rides[f'Wait Times Period {i+1}'] = 0
-        
-        col1.markdown("<h2 style='text-align: center;'>Active Rides</h2",
-                            unsafe_allow_html=True, help="Feel free to add, delete, or edit the rides data")
+
         experimental_rides_df = col1.experimental_data_editor(park_rides, num_rows="fixed")
 
         return experimental_rides_df
@@ -66,10 +78,10 @@ class OptimizePark():
     def required_constraints(self, rides):
         st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
         if st.session_state.optimization_problem == "Maximize Rides":
-            max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, help="What is the maximum total amount of time you'd like to spend waiting for rides?")
+            max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, value=100, help="What is the maximum total amount of time you'd like to spend waiting for rides?")
             min_total_rides_slider = None
         elif st.session_state.optimization_problem == "Minimize Time":
-            min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides.Rides), help="What is the minimum total number of rides you'd like to go on?")
+            min_total_rides_slider = st.sidebar.slider("Minimum Number of Total Rides Constraint", max_value=5*len(rides.Rides), value=10, help="What is the minimum total number of rides you'd like to go on?")
             max_time_slider = None
         return [max_time_slider, min_total_rides_slider]
 
@@ -135,7 +147,7 @@ class OptimizePark():
 
         if self.time_assumption == "Constant":
             try:
-                ride_values = pd.DataFrame({"Rides": list(results.keys()), "Values": list(results.values())})
+                ride_values = pd.DataFrame({"Rides": list(results.keys()), "Results": list(results.values())})
                 col2.dataframe(ride_values)
             except:
                 st.error(body="No feasible solution. If this is a stand-alone error message, consider increasing the max time constraint")
