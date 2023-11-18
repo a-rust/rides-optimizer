@@ -1,53 +1,25 @@
 # Table of Contents
 - [Table of Contents](#table-of-contents)
 - [Project Description](#project-description)
-- [Optimization Problems Solved](#optimization-problems-solved)
-  - [Constraints](#constraints)
-  - [Assumptions](#assumptions)
-  - [Limitations](#limitations)
-  - [Future Considerations](#future-considerations)
+- [Features](#features)
 - [Credits](#credits)
 
 # Project Description
-An interactive web app that solves various optimization problems involving amusement park rides and their wait times.
+This is an interactive web app that uses [integer programming](https://en.wikipedia.org/wiki/Integer_programming) to optimize your ride selection at various amusement parks based on ride wait times and personal constraints/preferences.
+* A formal description of the optimization problems solved be be found on the app: https://rides-optimizer.streamlit.app/ 
 
-# Optimization Problems Solved
-Given a set of amusement park rides (and their wait times),
-1. Maximize the total number of rides to go on.
-2. Minimize the total amount of time spent waiting in line for rides.
-
-## Constraints
-To make something meaningful out of these optimization problems, there need to be some constraints - both required and optional:
-* **Required Constraints**
-  * Maximum total amount of time allowed waiting in line for rides
-    * Only applies to the maximization problem above
-  * Minimum number of total rides to go on
-    * Only applies to the minimization problem above
-* **Optional Constraints**
-  * Which rides does the user want to go on at least once?
-  * Which rides does the user want to avoid all together?
-  * What is the minimum number of distinct rides that the user wants to go on at least once?
-  * What is the maximum number of times the user wants to ride any given ride?
-
-## Assumptions
-This app offers 2 distinct models, each under a different time assumption regarding the wait times of park rides:
-1. Constant wait times
-2. Dynamically changing wait times
-
-The wait time assumption influences the formalization of each optimization problem
-
-## Limitations
-* These optimization problems only solve for the optimal **set** of rides to go on, not the **path itself**
-  * For example, if the optimal solution includes rides $\{r_1, r_2, r_3\}$, this app will not solve for an optimal path including these vertices.
-    * One attempt to solve this would be to consider the distances between rides, and reconstruct the optimization problems using graphs with weighted edges
-* The optimization model with dynamically changing wait times is really only practical if the wait times at each time period are known beforehand
-
-
-## Future Considerations
-There are many different ways to build off of this project. Some considerations are:
-* Solve for the optimal path instead of the optimal set of rides
-* Build a predictive model to deal with the limitations of the dynamically changing wait times assumptions
-* Add features to deal with uncertainty such as weather, congestion, etc.
+# Features
+- [x] Multiple optimization models to cover various assumptions regarding the amount of time it takes waiting in line for a given ride
+- [x] Optimization models can be applied to real-time data from 3 major California amusement parks
+  * Disneyland Resort Magic Kingdom
+  * Disneyland Resort California Adventure
+  * Universal Studios
+- [x] Optimization models can also be applied in a demo mode for testing things out
+- [x] Support for user preferences such as:
+  * Which rides the user wants to go on at least once
+  * Which rides the user wants to avoid all together
+  * Maximum number of times a user wants to go on a given ride
+  * Minimum number of distinct rides a user wants to go on
 
 # Credits
-This app uses [ThemeParks API](https://themeparks.wiki/) to gather real-time data regarding the wait times of rides at major amusement parks all around the world. 
+This app uses [ThemeParks API](https://themeparks.wiki/) to gather real-time data of ride wait times from various amusement parks.
