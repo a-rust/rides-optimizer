@@ -3,9 +3,9 @@ import streamlit as st
 def guide():
     with st.expander("What is this?🎢"):
         st.markdown("This app helps optimize your ride selection at various amusement parks based on ride wait times and personal constraints/preferences")
-        st.markdown("Under the hood, this app uses [integer programming](https://en.wikipedia.org/wiki/Integer_programming) to solve the following 2 optimization problems:")
-        st.markdown("1. **Given a maximum amount of time a user is willing to spend waiting in line to go on rides, maximize the total number of times the user actually goes on a ride, while also respecting certain preferences set by the user**")
-        st.markdown("2. **Given a minimum number of rides a user wants to go on, minimize the total amount of time the user spends waiting in line, while also respecting certain preferences set by the user**")
+        st.markdown("Under the hood, this app uses [linear programming](https://en.wikipedia.org/wiki/Linear_programming) to solve the following 2 optimization problems:")
+        st.markdown("1. **Given a maximum amount of time a user is willing to spend waiting in line to go on rides, maximize the total number of rides the user goes on (allowing repeats), while also respecting certain preferences set by the user**")
+        st.markdown("2. **Given a minimum number of total rides a user wants to go on (allowing repeats), minimize the total amount of time the user spends waiting in line, while also respecting certain preferences set by the user**")
         st.markdown("Solving these problems depends on some assumptions made regarding how long it takes to wait in line for any given ride - are the wait-times for a given ride throughout the day **constant**, or do they **dynamically change**?")
         st.markdown("This app considers both cases - see below for the formal description of each optimization model")
         st.markdown("**These models are applied to real-time data from 3 major California amusement parks, as well as a demo mode for testing things out**")
