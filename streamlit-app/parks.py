@@ -71,7 +71,7 @@ class OptimizePark():
             for i in range(1, granularity[0]):
                 park_rides[f'Wait Times Period {i+1}'] = 0
 
-        experimental_rides_df = col1.experimental_data_editor(park_rides, num_rows="fixed")
+        experimental_rides_df = col1.data_editor(park_rides, num_rows="fixed")
 
         return experimental_rides_df
 
@@ -99,7 +99,7 @@ class OptimizePark():
 
         if st.session_state.optimization_problem == "Minimize Time":
             helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides.Rides))
-        
+
         user_preferences=up.UserPreferences(
             required_rides,
             avoid_rides,
@@ -108,7 +108,7 @@ class OptimizePark():
             required_constraints[0],
             required_constraints[1]
             )
-        
+
         user_preferences.convert_empty_data_types()
         return user_preferences
 
@@ -118,7 +118,7 @@ class OptimizePark():
             optimize_data = ct.OptimizeConstant(
                 all_rides=rides.iloc[:, 0].tolist(),
                 wait_times=rides.iloc[:, 1].tolist(),
-                user_preferences=user_preferences 
+                user_preferences=user_preferences
                 )
         elif self.time_assumption == "Dynamic":
             wait_times_lists = []
@@ -134,9 +134,9 @@ class OptimizePark():
                 time_steps=granularity[0],
                 frequency=granularity[1],
                 wait_times=wait_times,
-                user_preferences=user_preferences 
-                )    
-            
+                user_preferences=user_preferences
+                )
+
         ride_weights = optimize_data.set_ride_weights()
 
         col2.markdown("<h2 style='text-align: center;'>Optimal Results</h2", unsafe_allow_html=True, help="The 'Values' represent the number of times to go on a given ride")
@@ -151,7 +151,7 @@ class OptimizePark():
                 col2.dataframe(ride_values)
             except:
                 st.error(body="No feasible solution. If this is a stand-alone error message, consider increasing the max time constraint")
-            
+
         elif self.time_assumption == "Dynamic":
             ride_values = pd.DataFrame({"Rides": list(rides.Rides)})
             categorized_results = {}

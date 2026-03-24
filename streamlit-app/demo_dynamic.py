@@ -17,7 +17,7 @@ def main():
     optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent waiting in line?")
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
-    
+
     empty_col1, btn_col2, empty_col3 = st.columns((1, 1, 1))
     randomize_data_btn = btn_col2.button("Randomize Data")
     if randomize_data_btn:
@@ -29,10 +29,10 @@ def main():
         if st.session_state.optimization_problem == "Minimize Time":
             del st.session_state.rand_min_total_rides_slider_dynamic
         del st.session_state.rand_required_rides_dynamic
-        del st.session_state.rand_avoid_rides_dynamic 
+        del st.session_state.rand_avoid_rides_dynamic
         del st.session_state.rand_min_distinct_rides_dynamic
         del st.session_state.rand_max_ride_repeats_dynamic
-            
+
     ride_data_col1, result_col2 = st.columns((1, 1))
     time_steps = granularity()
     rides_dynamic = demo_rides(time_steps, ride_data_col1)
@@ -69,12 +69,12 @@ def demo_rides(granularity, ride_data_col1):
 
     if "rides_dynamic" not in st.session_state:
         st.session_state.rides_dynamic = rides_dynamic
-    
+
     ride_data_col1.markdown("<h2 style='text-align: center;'>Rides</h2", unsafe_allow_html=True)
 
-    experimental_rides_dynamic_df = ride_data_col1.experimental_data_editor(st.session_state.rides_dynamic, num_rows="dynamic")
+    experimental_rides_dynamic_df = ride_data_col1.data_editor(st.session_state.rides_dynamic, num_rows="dynamic")
     return experimental_rides_dynamic_df
-    
+
 
 def random_required_constraints_data(rides_dynamic):
     st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
@@ -115,7 +115,7 @@ def random_optional_constraints_data(rides_dynamic, required_constraints, granul
     # The rand_min_distinct_rides should not be larger than either (# of rides - # of avoided rides) or the min total rides (in the case of a minimization problem)
     if required_constraints[1] != None:
         rand_min_distinct_rides_dynamic = random.randint(0, min(len(rides_dynamic.Rides) - len(avoid_rides), required_constraints[1]))
-    else: 
+    else:
         rand_min_distinct_rides_dynamic = random.randint(1, len(rides_dynamic.Rides) - len(avoid_rides))
     if "rand_min_distinct_rides_dynamic" not in st.session_state:
         st.session_state.rand_min_distinct_rides_dynamic = rand_min_distinct_rides_dynamic
@@ -138,7 +138,7 @@ def random_optional_constraints_data(rides_dynamic, required_constraints, granul
         max_ride_repeats_slider,
         required_constraints[0],
         required_constraints[1]
-        ) 
+        )
 
     user_preferences.convert_empty_data_types()
     return user_preferences
@@ -157,17 +157,17 @@ def optimize(granularity, rides_dynamic, user_preferences, result_col2):
         time_steps=granularity[0],
         frequency=granularity[1],
         wait_times=wait_times,
-        user_preferences=user_preferences 
+        user_preferences=user_preferences
         )
 
     ride_weights = optimize_data.set_ride_weights()
-    
+
     result_col2.markdown("<h2 style='text-align: center;'>Results</h2", unsafe_allow_html=True, help="Watch how changing the inputs to the optimization problem affects the results. If you get an error, try and spot where certain constraints contradict each other")
     if st.session_state.optimization_problem == "Maximize Rides":
         results = optimize_data.maximize_rides(ride_weights)
     elif st.session_state.optimization_problem == "Minimize Time":
         results = optimize_data.minimize_time(ride_weights)
-    
+
     # Categorize results by each time period (i.e., group together the key tuples that have the same time period 1)
     categorized_results = {}
     for key, value in results.items():

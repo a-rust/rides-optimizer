@@ -17,7 +17,7 @@ def main():
     optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent waiting in line?")
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
-    
+
     # Have to create empty side columns to keep button centered
     empty_col1, btn_col2, empty_col3 = st.columns((1, 1, 1))
     randomize_data_btn = btn_col2.button("Randomize Data")
@@ -31,7 +31,7 @@ def main():
         del st.session_state.rand_avoid_rides
         del st.session_state.rand_min_distinct_rides
         del st.session_state.rand_max_ride_repeats
-        
+
     ride_data_col1, result_col2 = st.columns((1, 1))
     rides = demo_random_rides_data(ride_data_col1)
     required_constraints = random_required_constraints_data(rides)
@@ -49,7 +49,7 @@ def demo_random_rides_data(ride_data_col1):
 
     ride_data_col1.markdown("<h2 style='text-align: center;'>Rides</h2", unsafe_allow_html=True, help="Feel free to add, delete, or edit the rides data")
 
-    experimental_rides_df = ride_data_col1.experimental_data_editor(st.session_state.rides, num_rows="dynamic", key="user_rides")
+    experimental_rides_df = ride_data_col1.data_editor(st.session_state.rides, num_rows="dynamic", key="user_rides")
 
     return experimental_rides_df
 
@@ -92,7 +92,7 @@ def random_optional_constraints_data(rides, required_constraints):
     # The rand_min_distinct_rides should not be larger than either (# of rides - # of avoided rides) or the min total rides (in the case of a minimization problem)
     if required_constraints[1] != None:
         rand_min_distinct_rides = random.randint(0, min(len(rides.Rides) - len(avoid_rides), required_constraints[1]))
-    else: 
+    else:
         rand_min_distinct_rides = random.randint(1, len(rides.Rides) - len(avoid_rides))
     if "rand_min_distinct_rides" not in st.session_state:
         st.session_state.rand_min_distinct_rides = rand_min_distinct_rides
@@ -115,8 +115,8 @@ def random_optional_constraints_data(rides, required_constraints):
         max_ride_repeats_slider,
         {1: required_constraints[0]},
         required_constraints[1]
-        ) 
-    
+        )
+
     user_preferences.convert_empty_data_types()
     return user_preferences
 
@@ -124,7 +124,7 @@ def optimize(rides, user_preferences, result_col2):
     optimize_data = ct.OptimizeConstant(
         all_rides=rides.iloc[:, 0].tolist(),
         wait_times=rides.iloc[:, 1].tolist(),
-        user_preferences=user_preferences 
+        user_preferences=user_preferences
         )
 
     ride_weights = optimize_data.set_ride_weights()
