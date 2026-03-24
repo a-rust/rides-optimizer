@@ -14,7 +14,7 @@ import helper
 
 
 def main():
-    optimization_problem = st.selectbox("Please choose which optimization problem you'd like to solve", ("Maximize Rides", "Minimize Time"), help="Do you want to maximize the total number of rides to go on, or minimize the total amount of time spent waiting in line?")
+    optimization_problem = st.selectbox("Model Selection", ("Maximize Rides", "Minimize Time"), help="Select which optimization problem to solve.")
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
 
