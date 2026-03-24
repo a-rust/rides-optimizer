@@ -25,19 +25,16 @@ def define_park():
         st.markdown("<h1 style='text-align: center;'>Universal Studios</h1", unsafe_allow_html=True)
     return park
 
-def define_time_assumption():
-    time_assumption = st.selectbox("Please select the time assumptions to be used", ("Constant", "Dynamic"), help="Do you want to assume constant or dynamic wait and ride times?")
-    return time_assumption
+# def define_time_assumption():
+#     time_assumption = st.selectbox("Please select the time assumptions to be used", ("Constant", "Dynamic"), help="Do you want to assume constant or dynamic wait and ride times?")
+#     return 'Constant'
 
 def main():
     instructions.guide()
     park = define_park()
-    time_assumption = define_time_assumption()
+    time_assumption = 'Constant'
     if park == "Demo":
-        if time_assumption == "Constant":
             demo_constant.main()
-        elif time_assumption == "Dynamic":
-            demo_dynamic.main()
     elif park == "Disneyland Resort Magic Kingdom":
         rides = api_request("https://api.themeparks.wiki/preview/parks/DisneylandResortMagicKingdom/waittime")
         disney_kingdom = park_data.ParkData(rides)
@@ -48,11 +45,11 @@ def main():
         california_adventure = park_data.ParkData(rides)
         p = parks.OptimizePark(park, california_adventure.filter_for_active_rides(), time_assumption)
         p.main()
-    
+
     elif park == "Universal Studios":
         rides = api_request("https://api.themeparks.wiki/preview/parks/UniversalStudios/waittime")
         universal_studios = park_data.ParkData(rides)
         p = parks.OptimizePark(park, universal_studios.filter_for_active_rides(), time_assumption)
         p.main()
-        
+
 main()
