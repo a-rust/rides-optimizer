@@ -14,7 +14,7 @@ import helper
 
 
 def main():
-    optimization_problem = st.selectbox("Model Selection", ("Maximize Rides", "Minimize Time"), help="Select which optimization problem to solve.")
+    optimization_problem = st.selectbox("Model Selection", ("Maximize the total number of rides a user goes on within a given time frame", "Minimize the total amount of time a user spends waiting in line to go on rides"), help="Select which optimization problem to solve")
     if optimization_problem not in st.session_state:
         st.session_state.optimization_problem = optimization_problem
 
@@ -23,9 +23,9 @@ def main():
     randomize_data_btn = btn_col2.button("Randomize Data")
     if randomize_data_btn:
         del st.session_state.rides
-        if st.session_state.optimization_problem == "Maximize Rides":
+        if st.session_state.optimization_problem == "Maximize the total number of rides a user goes on within a given time frame":
             del st.session_state.rand_max_time_slider
-        if st.session_state.optimization_problem == "Minimize Time":
+        if st.session_state.optimization_problem == "Minimize the total amount of time a user spends waiting in line to go on rides":
             del st.session_state.rand_min_total_rides_slider
         del st.session_state.rand_required_rides
         del st.session_state.rand_avoid_rides
@@ -55,7 +55,7 @@ def demo_random_rides_data(ride_data_col1):
 
 def random_required_constraints_data(rides):
     st.sidebar.markdown("<h2 style='text-align: center;'>Required Constraint</h2", unsafe_allow_html=True, help="This constraint must be set to have any meaningful results")
-    if st.session_state.optimization_problem == "Maximize Rides":
+    if st.session_state.optimization_problem == "Maximize the total number of rides a user goes on within a given time frame":
         # Artificial lower bound on max time constraint to avoid infeasibility of randomly generated data
         rand_max_time_slider = random.randint(10*len(rides.Rides), 300)
         if "rand_max_time_slider" not in st.session_state:
@@ -63,7 +63,7 @@ def random_required_constraints_data(rides):
         max_time_slider = st.sidebar.slider("Maximum Time Constraint", max_value=300, value=st.session_state.rand_max_time_slider, help="What is the maximum total amount of time you'd like to spend waiting for rides?")
     else:
         max_time_slider = None
-    if st.session_state.optimization_problem == "Minimize Time":
+    if st.session_state.optimization_problem == "Minimize the total amount of time a user spends waiting in line to go on rides":
         rand_min_total_rides_slider = random.randint(0, len(rides.Rides))
         if "rand_min_total_rides_slider" not in st.session_state:
             st.session_state.rand_min_total_rides_slider = rand_min_total_rides_slider
@@ -105,7 +105,7 @@ def random_optional_constraints_data(rides, required_constraints):
         st.session_state.rand_max_ride_repeats = rand_max_ride_repeats
     max_ride_repeats_slider = st.sidebar.slider("Maximum Ride Repeats", min_value=1, value=st.session_state.rand_max_ride_repeats, help="What is the maximum number of times you'd like to ride any single ride?")
 
-    if st.session_state.optimization_problem == "Minimize Time":
+    if st.session_state.optimization_problem == "Minimize the total amount of time a user spends waiting in line to go on rides":
         helper.max_ride_repeats_contradiction(required_constraints[1], max_ride_repeats_slider, len(rides.Rides))
 
     user_preferences=up.UserPreferences(
@@ -130,14 +130,14 @@ def optimize(rides, user_preferences, result_col2):
     ride_weights = optimize_data.set_ride_weights()
 
     result_col2.markdown("<h2 style='text-align: center;'>Results</h2", unsafe_allow_html=True, help="Watch how changing the inputs to the optimization problem affects the results. If you get an error, try and spot where certain constraints contradict each other")
-    if st.session_state.optimization_problem == "Maximize Rides":
+    if st.session_state.optimization_problem == "Maximize the total number of rides a user goes on within a given time frame":
         results = optimize_data.maximize_rides(ride_weights)
         try:
             plt.bar(results.keys(), results.values())
             result_col2.pyplot(plt)
         except:
             st.error(body="No feasible solution. If this is a stand-alone error message, consider increasing the max time constraint")
-    elif st.session_state.optimization_problem == "Minimize Time":
+    elif st.session_state.optimization_problem == "Minimize the total amount of time a user spends waiting in line to go on rides":
         results = optimize_data.minimize_time(ride_weights)
         try:
             plt.bar(results.keys(), results.values())
