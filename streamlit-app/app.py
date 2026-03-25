@@ -14,7 +14,7 @@ def api_request(url):
     return url_request.json()
 
 def define_park():
-    park = st.sidebar.selectbox(label="Park", options=("Demo", "Disneyland Resort Magic Kingdom", "Disneyland Resort California Adventure", "Universal Studios"))
+    park = st.sidebar.selectbox(label="Park", options=("Demo", "Disneyland Resort Magic Kingdom", "Disneyland Resort California Adventure", "Universal Studios"), help="Select which data to use")
     if park == "Demo":
         st.markdown("<h1 style='text-align: center;'>Demo</h1", unsafe_allow_html=True)
     elif park == "Disneyland Resort Magic Kingdom":
