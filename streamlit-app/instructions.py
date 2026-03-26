@@ -1,137 +1,132 @@
 import streamlit as st
 
 def guide():
-    with st.expander("What is this?🎢"):
-        st.markdown("This app helps optimize your ride selection at various amusement parks based on ride wait times and personal constraints/preferences")
-        st.markdown("Under the hood, this app uses [linear programming](https://en.wikipedia.org/wiki/Linear_programming) to solve the following 2 optimization problems:")
-        st.markdown("1. **Given a maximum amount of time a user is willing to spend waiting in line to go on rides, maximize the total number of rides the user goes on (allowing repeats), while also respecting certain preferences set by the user**")
-        st.markdown("2. **Given a minimum number of total rides a user wants to go on (allowing repeats), minimize the total amount of time the user spends waiting in line, while also respecting certain preferences set by the user**")
-        st.markdown("Solving these problems depends on some assumptions made regarding how long it takes to wait in line for any given ride - are the wait-times for a given ride throughout the day **constant**, or do they **dynamically change**?")
-        st.markdown("This app considers both cases - see below for the formal description of each optimization model")
-        st.markdown("**These models are applied to real-time data from 3 major California amusement parks, as well as a demo mode for testing things out**")
-        st.markdown("* The real-time data comes from: (https://themeparks.wiki/)")
-        # st.markdown("2. Minimize the total amount of time spent waiting in line for rides, given some minimum number of total rides you'd like to go on")
-    with st.expander("Maximization Problem Under Constant Time Assumptions"):
-        st.subheader("Variables:")
-        st.markdown("Let R be the set of all unique rides $r_i$")
-        st.markdown("Let $r_{(i, o)}$ be the number of occurrences a user goes on ride i")
-        st.markdown("Let $r_{(i, w)}$ be the (constant) wait time to get on ride i.")
-        st.markdown("Let $t$ be the max amount of time a user wants to spend waiting in line for rides")
-        st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
-        st.markdown("* If $r_{(i, p)} = 0$, then the user wants to avoid $r_i$ entirely")
-        st.markdown("* If $r_{(i, p)} = 1$, then the user wants to go on $r_i$ at least once")
-        st.markdown("* If $r_{(i, p)} = 2$, then the user has no preference")
-        st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on a ride")
-        st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
-        st.markdown("Let $r_{(i, u)}$ be a binary variable keeping track of whether ride i has been rode at least once or not")
-        st.markdown(" * If $r_{(i, u)}$ = 1, then ride i has at least 1 ride occurrence")
-        st.markdown(" * If $r_{(i, u)}$ = 0, then ride i has 0 ride occurrences")
-        st.subheader("Objective:")
-        st.latex("\max \sum_{i \in R} r_{(i, o)}")
-        st.markdown("Subject to:")
-        st.latex("\\forall i \in R, r_{(i, o)} <= m")
-        st.latex("\sum_{i \in R} r_{(i, o)} \cdot r_{(i, w)}<= t")
-        st.latex("r_{(i, p)} = 1 \implies r_{(i, o)} \geq 1")
-        st.latex("r_{(i, p)} = 0 \implies r_{(i, o)} = 0")
-        st.latex("r_{(i, o)} \geq r_{(i, u)}")
-        st.latex("\sum_{i \in R} r_{(i, o)} > d")
-        st.latex("r_{(i, o)}, r_{(i, w)}, t, d \in \mathbb{N^+}")
-        st.latex("r_{(i, u)} \in \{0, 1\}")
-        st.latex("r_{(i, p)} \in \{0, 1, 2\}")
+    st.markdown("<h1 style='text-align: center;'>Amusement Park Rides Optimizer</h1", unsafe_allow_html=True)
+    st.markdown("This is an interactive web app that uses [integer programming](https://en.wikipedia.org/wiki/Integer_programming) to solve optimization problems involving wait times for amusement park rides.")
 
-    with st.expander("Maximization Problem Under Dynamically Changing Time Assumptions"):
-        st.subheader("Brief Description")
-        st.markdown("This optimization model extends the constant wait time model by splitting the time spent at the park into $n$ \"time steps\" (specified by the user), each of an equal amount time.")
-        st.markdown("* For example, a stay of 120 minutes at the park can be split up into 4 time steps of 30 minutes each, or 6 time steps of 20 minutes each, etc.")
-        st.markdown("* The more time steps, the finer the granularity, which in theory, should lead to a stronger optimization")
-        st.markdown("**The objective is to maximize the number of ride occurrences over all combined time steps**")
-        st.subheader("Variables:")
-        st.markdown("Let R be the set of all unique rides $r_i$")
-        st.markdown("Let $t_s$ be the number of time steps")
-        st.markdown("Let $T$ be the set $\{1, \dots, t_s\}$")
-        st.markdown("Let $t_d$ be the duration of each time step")
-        st.markdown("Let $t_u$ be the amount of total time a user wants to spend at the park")
-        st.markdown("Let $r_{(i, o, t)}$ be the number of occurrences a user goes on ride i at time step t")
-        st.markdown("Let $r_{(i, w, t)}$ be the wait time to get on ride i at time step t")
-        st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
-        st.markdown("* If $r_{(i, p)} = 0$, then the user wants to avoid $r_i$ entirely")
-        st.markdown("* If $r_{(i, p)} = 1$, then the user wants to go on $r_i$ at least once")
-        st.markdown("* If $r_{(i, p)} = 2$, then the user has no preference")
-        st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on a ride")
-        st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
-        st.markdown("Let $r_{(i, u)}$ be a binary variable keeping track of whether ride i has been rode at least once or not")
-        st.markdown(" * If $r_{(i, u)}$ = 1, then ride i has at least 1 ride occurrence")
-        st.markdown(" * If $r_{(i, u)}$ = 0, then ride i has 0 ride occurrences")
-        st.subheader("Objective:")
-        st.latex("\max \sum_{i \in R, t \in T} r_{(i, o, t)}")
-        st.markdown("Subject to:")
-        st.latex("\\forall t \in T, \sum_{i \in R} r_{(i, o, t)} \cdot r_{(i, w, t)}<= t_d")
-        st.latex("\sum_{i \in R, t \in T} r_{(i, o, t)} \cdot r_{(i, w, t)}<= t_u")
-        st.latex("r_{(i, p)} = 1 \implies \sum_{i \in R, t \in T} r_{(i, o, t)} \geq 1")
-        st.latex("r_{(i, p)} = 0 \implies \sum_{i \in R, t \in T} r_{(i, o, t)} = 1")
-        st.latex("\\forall i \in R, \sum_{t \in T} r_{(i, o, t)} \leq m")
-        st.latex("\\forall i \in R, \sum_{t \in T}r_{(i, o, t)} \geq r_{(i, u)}")
-        st.latex("\sum_{i \in R} r_{(i, u)} > d")
-        st.latex("r_{(i, o, t)}, r_{(i, w, t)}, t_s, t_d, t_u, m, d \in \mathbb{N^+}")
-        st.latex("r_{(i, u)} \in \{0, 1\}")
-        st.latex("r_{(i, p)} \in \{0, 1, 2\}")
+    st.markdown("<h3 style='text-align: center;'>Optimization Models</h3", unsafe_allow_html=True)
+    st.markdown("This app solves the following optimization problems:")
+    with st.expander("Maximize the total number of rides a user goes on within a given time frame"):
+        # Informal Description
+        with st.expander("Informal Description"):
+            st.markdown("This optimization problem seeks to maximize the total number of rides a user goes on, given the following constraints:", help="The user can choose whether or not to allow ride repeats within the optimal solution (reference the constraints below)")
+            st.markdown("* The user is willing to spend a combined total of at most $t$ minutes waiting in line to go on all rides within the optimal solution")
+            st.markdown("* The user can choose which rides to go on at least once")
+            st.markdown("* The user can choose which rides to avoid entirely")
+            st.markdown("* The user can choose the minimum number of distinct rides to go on at least once")
+            st.markdown("* The user can choose the maximum number of times a ride can be repeated")
+
+        # Formal Description
+        with st.expander("Formal Description"):
+
+            # Definition
+            st.subheader("Variables:")
+            st.markdown("Let R be the set of all unique rides $r_i$")
+            st.markdown("Let $r_{(i, o)}$ be the number of times a user goes on ride $r_i$")
+            st.markdown("Let $r_{(i, w)}$ be the wait time to go on ride $r_i$")
+            st.markdown("Let $w := \sum_{r_i \in R}r_{(i, o)} \cdot r_{(i, w)}$", help="$w$ is the total amount time a user spends waiting in line to go on rides")
+
+            # User-defined Variables
+            st.subheader("User-defined Variables:")
+            st.markdown("Let $t$ be the maximum cummulative sum a user is willing to spend waiting in line to go on rides", help="This leads to the constraint: $w \leq t$")
+            st.markdown("Let $r$ be the maximum number of times a user is willing to repeat going on any given ride $r_i$")
+            st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
+
+            # Ternary variable definition
+            st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
+            st.markdown("* $r_{(i, p)} = 0$ implies that the user wants to avoid $r_i$ entirely")
+            st.markdown("* $r_{(i, p)} = 1$ implies that the user wants to go on $r_i$ at least once")
+            st.markdown("* $r_{(i, p)} = 2$ implies that the user has no preference")
+
+            # Binary variable definition
+            st.markdown("Let $r_{(i, u)}$ be a binary variable keeping track of whether a user has gone on ride $r_i$ at least once")
+            st.markdown("* $r_{(i, u)}$ = 1 implies that the user has gone on ride $r_i$ at least once")
+            st.markdown("* $r_{(i, u)}$ = 0 imples that the user has not gone at ride $r_i$")
+            st.subheader("Objective Function:")
+            st.latex("\max \sum_{r_i \in R} r_{(i, o)}", help="Maximize the total number of rides a user goes on")
+
+            # Constraints
+            st.markdown("Subject to:")
+            st.latex("\\forall i \in R, r_{(i, o)} <= r", help="The user goes any given ride $r_i$ at most m time")
+            st.latex("w <= t", help="The total amount of time the user spends waiting in line to go on rides is less than $t$")
+            st.latex("r_{(i, p)} = 1 \implies r_{(i, o)} \geq 1", help="If the user wants to go on ride $r_i$ at least once, then $r_{(i, o)} \geq 1$")
+            st.latex("r_{(i, p)} = 0 \implies r_{(i, o)} = 0", help="If the user wants to avoid going on ride $r_i$ entirely, then $r_{(i, o)} = 0")
+            st.latex("r_{(i, o)} \geq r_{(i, u)}", help="Enforces the binary decision variable $r_{(i, u)}$")
+            st.latex("\sum_{r_i \in R} r_{(i, u)} \geq d", help="Enforces the minimum number of distinct rides constraint")
+            st.latex("r_{(i, o)}, r_{(i, w)}, t, d, r \in \mathbb{N^+}")
+            st.latex("r_{(i, u)} \in \{0, 1\}")
+            st.latex("r_{(i, p)} \in \{0, 1, 2\}")
+
+        # Optimal solution
+        st.markdown("The optimal solution (found in the **Results** section below) determines which rides the user should go on (and how many times).")
+
+    with st.expander("Minimize the total amount of time a user spends waiting in line to go on rides"):
+        # Informal Description
+        with st.expander("Informal Description"):
+            st.markdown("This optimization problem seeks to minimize the total amount of time a user spends waiting in line to go on rides, given the following constraints:", help="The user can choose whether or not to allow ride repeats within the optimal solution (reference the constraints below)")
+            st.markdown("* The user wants to go on at least $n$ total rides", help="The user can choose whether or not $n$ includes ride repeats")
+            st.markdown("* The user can choose which rides to go on at least once")
+            st.markdown("* The user can choose which rides to avoid entirely")
+            st.markdown("* The user can choose the minimum number of distinct rides to go on at least once")
+            st.markdown("* The user can choose the maximum number of times a ride can be repeated")
+
+        # Formal Description
+        with st.expander("Formal description of minimization problem"):
+
+            # Definitions
+            st.subheader("Variables:")
+            st.markdown("Let R be the set of all unique rides $r_i$")
+            st.markdown("Let $r_{(i, o)}$ be the number of times a user goes on ride $r_i$")
+            st.markdown("Let $r_{(i, w)}$ be the wait time to go on ride $r_i$")
+
+            #User-defined Variables
+            st.subheader("User-defined Variables:")
+            st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
+            st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on a ride")
+            st.markdown("Let $r$ be the minimum number of total rides a user wants to go on", help="This includes ride repeats if $m \geq 2$")
+
+            # Ternary variable definition
+            st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
+            st.markdown("* $r_{(i, p)} = 0$ implies that the user wants to avoid $r_i$ entirely")
+            st.markdown("* $r_{(i, p)} = 1$ implies that the user wants to go on $r_i$ at least once")
+            st.markdown("* $r_{(i, p)} = 2$ implies that the user has no preference")
+
+            # Binary variable definition
+            st.markdown("Let $r_{(i, u)}$ be a binary variable keeping track of whether a user has gone on ride $r_i$ at least once")
+            st.markdown("* $r_{(i, u)}$ = 1 implies that the user has gone on ride $r_i$ at least once")
+            st.markdown("* $r_{(i, u)}$ = 0 imples that the user has not gone at ride $r_i$")
+
+            # Objective Function
+            st.subheader("Objective Function:")
+            st.latex("\min \sum_{r_i \in R} r_{(i, w)}", help="Minimize the cummulative sum of minutes a user spends waiting in line to go on rides")
+
+            # Constraints
+            st.markdown("Subject to:")
+            st.latex("\sum_{r_i \in R} r_{(i, o)} \geq r", help="The total number of rides the user goes on is at least $r$")
+            st.latex("\\forall i \in R, r_{(i, o)} <= m", help="The user goes any given ride $r_i$ at most m times")
+            st.latex("r_{(i, p)} = 1 \implies r_{(i, o)} \geq 1", help="If the user wants to go on ride $r_i$ at least once, then $r_{(i, o)} \geq 1$")
+            st.latex("r_{(i, p)} = 0 \implies r_{(i, o)} = 0", help="If the user wants to avoid going on ride $r_i$ entirely, then $r_{(i, o)} = 0")
+            st.latex("r_{(i, o)} \geq r_{(i, u)}", help="Enforces the binary decision variable $r_{(i, u)}$")
+            st.latex("\sum_{r_i \in R} r_{(i, u)} \geq d", help="Enforces the minimum number of distinct rides constraint")
+            st.latex("r_{(i, o)}, r_{(i, w)}, d, m, r \in \mathbb{N^+}")
+            st.latex("r_{(i, u)} \in \{0, 1\}")
+            st.latex("r_{(i, p)} \in \{0, 1, 2\}")
+
+        # Optimal solution
+        st.markdown("The optimal solution (found in the **Results** section below) determines which rides the user should go on (and how many times).")
 
 
-    with st.expander("Minimization Problem Under Constant Time Assumptions"):
-        st.subheader("Variables:")
-        st.markdown("Let R be the set of all unique rides $r_i$")
-        st.markdown("Let $r_{(i, o)}$ be the number of occurrences a user goes on ride i")
-        st.markdown("Let $r_{(i, w)}$ be the (constant) wait time to get on ride i.")
-        st.markdown("Let $r$ be the minimum number of rides a user wants to go on")
-        st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
-        st.markdown("* If $r_{(i, p)} = 0$, then the user wants to avoid $r_i$ entirely")
-        st.markdown("* If $r_{(i, p)} = 1$, then the user wants to go on $r_i$ at least once")
-        st.markdown("* If $r_{(i, p)} = 2$, then the user has no preference")
-        st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on a ride")
-        st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
-        st.markdown("Let $r_{(i, u)}$ be a binary variable keeping track of whether ride i has been rode at least once or not")
-        st.markdown(" * If $r_{(i, u)}$ = 1, then ride i has at least 1 ride occurrence")
-        st.markdown(" * If $r_{(i, u)}$ = 0, then ride i has 0 ride occurrences")
-        st.subheader("Objective:")
-        st.latex("\min \sum_{i \in R} r_{(i, w)}")
-        st.markdown("Subject to:")
-        st.latex("\sum_{i \in R} r_{(i, o)} \geq r")
-        st.latex("\\forall i \in R, r_{(i, o)} <= m")
-        st.latex("r_{(i, p)} = 1 \implies r_{(i, o)} \geq 1")
-        st.latex("r_{(i, p)} = 0 \implies r_{(i, o)} = 0")
-        st.latex("r_{(i, o)} \geq r_{(i, u)}")
-        st.latex("\sum_{i \in R} r_{(i, o)} > d")
-        st.latex("r_{(i, o)}, r_{(i, w)}, t, d \in \mathbb{N^+}")
-        st.latex("r_{(i, u)} \in \{0, 1\}")
-        st.latex("r_{(i, p)} \in \{0, 1, 2\}")
 
-    with st.expander("Minimization Problem Under Dynamic Time Assumptions"):
-        st.subheader("Variables:")
-        st.markdown("Let R be the set of all unique rides $r_i$")
-        st.markdown("Let $t_s$ be the number of time steps")
-        st.markdown("Let $T$ be the set $\{1, \dots, t_s\}$")
-        st.markdown("Let $t_d$ be the duration of each time step")
-        st.markdown("Let $r$ the minimum number of rides a user wants to go on")
-        st.markdown("Let $r_{(i, o, t)}$ be the number of occurrences a user goes on ride i at time step t")
-        st.markdown("Let $r_{(i, w, t)}$ be the wait time to get on ride i at time step t")
-        st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
-        st.markdown("* If $r_{(i, p)} = 0$, then the user wants to avoid $r_i$ entirely")
-        st.markdown("* If $r_{(i, p)} = 1$, then the user wants to go on $r_i$ at least once")
-        st.markdown("* If $r_{(i, p)} = 2$, then the user has no preference")
-        st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on a ride")
-        st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
-        st.markdown("Let $r_{(i, u)}$ be a binary variable keeping track of whether ride i has been rode at least once or not")
-        st.markdown(" * If $r_{(i, u)}$ = 1, then ride i has at least 1 ride occurrence")
-        st.markdown(" * If $r_{(i, u)}$ = 0, then ride i has 0 ride occurrences")
-        st.subheader("Objective:")
-        st.latex("\min \sum_{i \in R, t \in T} r_{(i, o, w)}")
-        st.markdown("Subject to:")
-        st.latex("\sum_{i \in R, t \in T} r_{(i, o, t)} \geq r")
-        st.latex("r_{(i, p)} = 1 \implies \sum_{i \in R, t \in T} r_{(i, o, t)} \geq 1")
-        st.latex("r_{(i, p)} = 0 \implies \sum_{i \in R, t \in T} r_{(i, o, t)} = 1")
-        st.latex("\\forall i \in R, \sum_{t \in T} r_{(i, o, t)} \leq m")
-        st.latex("\\forall i \in R, \sum_{t \in T}r_{(i, o, t)} \geq r_{(i, u)}")
-        st.latex("\sum_{i \in R} r_{(i, u)} > d")
-        st.latex("r_{(i, o, t)}, r_{(i, w, t)}, t_s, t_d, r, m, d \in \mathbb{N^+}")
-        st.latex("r_{(i, u)} \in \{0, 1\}")
-        st.latex("r_{(i, p)} \in \{0, 1, 2\}")
+    # Model Assumptions
+    st.markdown("<h3 style='text-align: center;'>Model Assumptions</h3", unsafe_allow_html=True)
+    st.markdown("The optimization models within this app assume that all ride wait times are constant and do not change.")
+
+    # Park Data
+    st.markdown("<h3 style='text-align: center;'>Park Data</h3", unsafe_allow_html=True)
+    st.markdown("This app features a **Demo** mode where randomly-generated data is used as input for the optimization models.")
+    st.markdown("This app also includes real-time ride wait times for the following California amusement parks:", help="Use the **Park** dropdown in the sidebar menu to select which data the optimization models will use")
+    st.markdown("* **Disneyland Resort Magic Kingdom**")
+    st.markdown("* **Disneyland Resort California Adventure**")
+    st.markdown("* **Universal Studios**")
+    st.markdown(">The California amusement park data is from: (https://themeparks.wiki/)")
+    st.divider()
