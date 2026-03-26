@@ -29,7 +29,7 @@ def guide():
             # User-defined Variables
             st.subheader("User-defined Variables:")
             st.markdown("Let $t$ be the maximum cummulative sum a user is willing to spend waiting in line to go on rides", help="This leads to the constraint: $w \leq t$")
-            st.markdown("Let $r$ be the maximum number of times a user is willing to repeat going on any given ride $r_i$")
+            st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on any given ride $r_i$")
             st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
 
             # Ternary variable definition
@@ -47,13 +47,13 @@ def guide():
 
             # Constraints
             st.markdown("Subject to:")
-            st.latex("\\forall i \in R, r_{(i, o)} <= r", help="The user goes any given ride $r_i$ at most m time")
+            st.latex("\\forall {r_i \in R}, r_{(i, o)} <= m", help="The user goes any given ride $r_i$ at most m time")
             st.latex("w <= t", help="The total amount of time the user spends waiting in line to go on rides is less than $t$")
             st.latex("r_{(i, p)} = 1 \implies r_{(i, o)} \geq 1", help="If the user wants to go on ride $r_i$ at least once, then $r_{(i, o)} \geq 1$")
             st.latex("r_{(i, p)} = 0 \implies r_{(i, o)} = 0", help="If the user wants to avoid going on ride $r_i$ entirely, then $r_{(i, o)} = 0")
             st.latex("r_{(i, o)} \geq r_{(i, u)}", help="Enforces the binary decision variable $r_{(i, u)}$")
             st.latex("\sum_{r_i \in R} r_{(i, u)} \geq d", help="Enforces the minimum number of distinct rides constraint")
-            st.latex("r_{(i, o)}, r_{(i, w)}, t, d, r \in \mathbb{N^+}")
+            st.latex("r_{(i, o)}, r_{(i, w)}, t, d, m \in \mathbb{N}^+")
             st.latex("r_{(i, u)} \in \{0, 1\}")
             st.latex("r_{(i, p)} \in \{0, 1, 2\}")
 
@@ -83,7 +83,7 @@ def guide():
             st.subheader("User-defined Variables:")
             st.markdown("Let $d$ be the minimum number of distinct rides a user wants to go on at least once")
             st.markdown("Let $m$ be the maximum number of times a user is willing to repeat going on a ride")
-            st.markdown("Let $r$ be the minimum number of total rides a user wants to go on", help="This includes ride repeats if $m \geq 2$")
+            st.markdown("Let $t$ be the minimum number of total rides a user wants to go on", help="This includes ride repeats if $m \geq 2$")
 
             # Ternary variable definition
             st.markdown("Let $r_{(i, p)}$ be a ternary variable indicating whether a user wants to go on ride $i$ at least once, or avoid it entirely")
@@ -102,13 +102,13 @@ def guide():
 
             # Constraints
             st.markdown("Subject to:")
-            st.latex("\sum_{r_i \in R} r_{(i, o)} \geq r", help="The total number of rides the user goes on is at least $r$")
-            st.latex("\\forall i \in R, r_{(i, o)} <= m", help="The user goes any given ride $r_i$ at most m times")
+            st.latex("\sum_{r_i \in R} r_{(i, o)} \geq t", help="The total number of rides the user goes on is at least $t$")
+            st.latex("\\forall {r_i \in R}, r_{(i, o)} <= m", help="The user goes any given ride $r_i$ at most m times")
             st.latex("r_{(i, p)} = 1 \implies r_{(i, o)} \geq 1", help="If the user wants to go on ride $r_i$ at least once, then $r_{(i, o)} \geq 1$")
             st.latex("r_{(i, p)} = 0 \implies r_{(i, o)} = 0", help="If the user wants to avoid going on ride $r_i$ entirely, then $r_{(i, o)} = 0")
             st.latex("r_{(i, o)} \geq r_{(i, u)}", help="Enforces the binary decision variable $r_{(i, u)}$")
             st.latex("\sum_{r_i \in R} r_{(i, u)} \geq d", help="Enforces the minimum number of distinct rides constraint")
-            st.latex("r_{(i, o)}, r_{(i, w)}, d, m, r \in \mathbb{N^+}")
+            st.latex("r_{(i, o)}, r_{(i, w)}, d, m, t \in \mathbb{N^+}")
             st.latex("r_{(i, u)} \in \{0, 1\}")
             st.latex("r_{(i, p)} \in \{0, 1, 2\}")
 
